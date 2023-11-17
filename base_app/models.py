@@ -8,7 +8,6 @@ from django.db import models
 from django.db.models import JSONField
 # Create your models here.
 
-
 class branch_registration(models.Model):
     branch_name = models.CharField(max_length=100)
     location = models.CharField(max_length=100)
@@ -43,7 +42,7 @@ class designation(models.Model):
     department = models.ForeignKey(department, on_delete=models.SET_NULL , related_name='departmentbranch',null=True,blank=True)
     branch = models.ForeignKey(branch_registration, on_delete=models.SET_NULL,
                                related_name='designationbranch', null=True, blank=True)
-    designation = models.CharField(max_length=100)
+    designation = models.CharField(max_length=100,default='')
    
     files=models.FileField(upload_to = 'images/', null=True, blank=True)
     status = models.CharField(max_length=100)
@@ -59,7 +58,7 @@ class Batch(models.Model):
     bt_status=models.CharField(max_length=20,default='0')
 
 class create_team(models.Model):
-    bt_name=models.CharField(max_length=200, default='')
+    
     name = models.CharField(max_length=200)
     trainer = models.CharField(max_length=200, default='')
     progress = models.IntegerField()
@@ -69,6 +68,7 @@ class create_team(models.Model):
     trainer_id = models.CharField(max_length=200,null=True, blank=True, default='')
     startdate = models.DateField(auto_now_add=False, auto_now=False,  null=True, blank=True)
     enddate = models.DateField(auto_now_add=False, auto_now=False,  null=True, blank=True)
+    bt_name=models.CharField(max_length=200, default='')
 
 
     def __str__(self):
@@ -81,6 +81,7 @@ class course(models.Model):
     def _str_(self):
         return self.name
 
+
 class user_registration(models.Model):
     designation = models.ForeignKey(designation, on_delete=models.SET_NULL,
                                     related_name='userregistrationdesignation', null=True, blank=True)
@@ -92,7 +93,7 @@ class user_registration(models.Model):
                              related_name='userregistrationteam', null=True, blank=True)
     course = models.ForeignKey(course, on_delete=models.SET_NULL, related_name='course_name',null=True,blank=True)
     fullname = models.CharField(max_length=240, null=True)
-    employee_type = models.CharField(max_length=15, null=True, default='0')
+    
     fathername = models.CharField(max_length=240, null=True)
     mothername = models.CharField(max_length=240, null=True)
     dateofbirth = models.DateField(
@@ -153,11 +154,12 @@ class user_registration(models.Model):
     hr_designation = models.CharField(max_length=120, default='',null=True, blank=True)
     reg_status =  models.CharField(max_length=10, default='0')
     trainee_delay=models.IntegerField(default=0)
-    work_status =  models.CharField(max_length=10, default='')
-    desig_input = models.CharField(max_length=30, default='')
+    desig_input = models.CharField(max_length=100, default='',null=True, blank=True)
     department_input=models.CharField(max_length=30, default='')
+    employee_type = models.CharField(max_length=15, null=True, default='0')
+    work_status =  models.CharField(max_length=10, default='')
+    performance =  models.CharField(max_length=50, default='')
     trainee_status = models.IntegerField(default='0')
-  
    
  
     def __str__(self):
@@ -165,8 +167,9 @@ class user_registration(models.Model):
 
     @property
     def avg(self):
-        return (self.attitude+self.creativity+self.workperformance)/3
-    
+        return (self.attitude+self.creativity+self.workperformance)/3    
+
+
 
 class extracurricular(models.Model):
     user = models.ForeignKey(user_registration, on_delete=models.SET_NULL,
@@ -239,10 +242,11 @@ class project(models.Model):
     enddate = models.DateField(
         auto_now_add=False, auto_now=False,  null=True, blank=True)
     files = models.FileField(upload_to='images/', null=True, blank=True)
-    uifile = models.FileField(upload_to='images/', null=True, blank=True)
+    
     progress = models.CharField(max_length=100)
-    user_reason = models.CharField(max_length=100, null=True, blank=True)
     status = models.CharField(max_length=100, null=True, blank=True)
+    user_reason = models.CharField(max_length=100, null=True, blank=True)
+    uifile = models.FileField(upload_to='images/', null=True, blank=True)
 
 
     def __str__(self):
@@ -259,9 +263,12 @@ class project_taskassign(models.Model):
     teamleader = models.CharField(max_length=200, null=True, blank=True),                    
     tester = models.ForeignKey(user_registration, on_delete=models.SET_NULL,
                                related_name='project_taskassign_tester', null=True, blank=True)
+    departments = models.ForeignKey(department, on_delete=models.SET_NULL,
+                               related_name='project_taskassign_department', null=True, blank=True)
     description = models.TextField()
-    projmodule=models.CharField(max_length=150, null=True, blank=True)
+    
     task = models.CharField(max_length=200, null=True, blank=True)
+    
     subtask = models.CharField(max_length=200, null=True, blank=True)
     startdate = models.DateField(
         auto_now_add=False, auto_now=False,  null=True, blank=True)
@@ -288,9 +295,8 @@ class project_taskassign(models.Model):
     workaccept = models.FileField(upload_to='images/', null=True, blank=True,default="0")
     worktype = models.CharField(max_length=15, null=True,default="0")
     tsakworkdays= models.IntegerField(default='0', null=True) 
+    projmodule=models.CharField(max_length=150, null=True, blank=True)
     tsakdelaydays= models.IntegerField(default='0', null=True) 
-    tester_delay = models.IntegerField(default='0', null=True) 
-    
 
     def __str__(self):
         return self.project.project
@@ -382,6 +388,7 @@ class leave(models.Model):
     leaveapprovedstatus = models.CharField(max_length=200, default="0")
     leave_rejected_reason = models.CharField(max_length=300)
     days = models.IntegerField(default=0)
+    accounts_action = models.IntegerField(default=0)
 
     
     def __str__(self):
@@ -472,7 +479,7 @@ class Trainer_Task_Correction(models.Model):
     correctionfiles = models.FileField(upload_to='images/', null=True, blank=True)
 
 
-    
+
 
 # Trainee Task test by Trainer
 class trainer_task_test(models.Model):
@@ -492,6 +499,9 @@ class trainer_task_test(models.Model):
         auto_now_add=False, auto_now=False,  null=True, blank=True)
     test_date = models.DateField(
         auto_now_add=True, auto_now=False,  null=True, blank=True)
+
+
+
 
 
 class topic(models.Model):
@@ -865,38 +875,21 @@ class TSproject_Task_verify(models.Model):
     ts_task_verify_date=models.DateField(auto_now_add=True, auto_now=False,  null=True, blank=True)
     ts_task_sub_date=models.DateField(auto_now_add=False, auto_now=False,  null=True, blank=True)
     ts_task_status=models.CharField(max_length=200, null=True,default="")
-    ts_delay= models.IntegerField(default='0', null=True) 
+    ts_delay=models.CharField(max_length=200, null=True,default="0")
     ts_reson_dely=models.TextField(default=" ")
 
 
 
 #******************** Project Document - shebin shaji (25-10-22) *****************
     
-class PM_ProjectDocument(models.Model):
-    doc_project_id=models.ForeignKey(project,on_delete=models.CASCADE,null=True,blank=True)
-    doc_project_name=models.CharField(max_length=100,null=True, blank=True)
-    doc_project_currentdate=models.DateField(auto_now_add=True, auto_now=False,  null=True, blank=True)
-    doc_project_startdate=models.DateField(auto_now_add=False, auto_now=False,  null=True, blank=True)
-    doc_project_enddate=models.DateField(auto_now_add=False, auto_now=False,  null=True, blank=True)
-    doc_project_frontend=models.CharField(max_length=100,null=True, blank=True)
-    doc_project_backend=models.CharField(max_length=100,null=True, blank=True)
-    doc_status=models.CharField(max_length=10,null=True, blank=True,default='0')
-    doc_project_ui=models.FileField(upload_to="ProjectUI", null=True)
-    
 
-class ProjectDocDetails(models.Model):
-    doc_project_d=models.ForeignKey(project,on_delete=models.CASCADE,null=True,blank=True)
-    doc_project_currentdate_d=models.DateField(auto_now_add=True, auto_now=False,  null=True, blank=True)
-    doc_project_mdname=models.CharField(max_length=100,null=True, blank=True)
-    doc_project_mddise_d=models.TextField()
-    doc_duser=models.ForeignKey(user_registration,on_delete=models.CASCADE,null=True,blank=True)
 
-class ProjectDocModels(models.Model):
-    doc_project_md=models.ForeignKey(project,on_delete=models.CASCADE,null=True,blank=True)
-    doc_project_currentdate_md=models.DateField(auto_now_add=True, auto_now=False,  null=True, blank=True)
-    doc_project_mdname=models.CharField(max_length=100,null=True, blank=True)
-    doc_project_dise_md=models.TextField()
-    doc_mduser=models.ForeignKey(user_registration,on_delete=models.CASCADE,null=True,blank=True)
+class WorkRequest(models.Model):
+    wrk_develp=models.ForeignKey(user_registration,on_delete=models.CASCADE,related_name='wrk_devp',null=True,blank=True)
+    wrkreq_date=models.DateField(auto_now_add=True, auto_now=False,  null=True, blank=True)
+    wrkreq_tl=models.ForeignKey(user_registration,on_delete=models.CASCADE,related_name='wrk_tl',null=True,blank=True)
+    wrk_status=models.CharField(max_length=200,null=True, blank=True,default='')
+
 
 class ProjectDocViews(models.Model):
     doc_project_v=models.ForeignKey(project,on_delete=models.CASCADE,null=True,blank=True)
@@ -956,13 +949,6 @@ class wrdata(models.Model):
     wrn_reason=models.CharField(max_length=200,null=True, blank=True)
     wrn_date=models.DateField(auto_now_add=True, auto_now=False,  null=True, blank=True)
 
-class WorkRequest(models.Model):
-    wrk_develp=models.ForeignKey(user_registration,on_delete=models.CASCADE,related_name='wrk_devp',null=True,blank=True)
-    wrkreq_date=models.DateField(auto_now_add=True, auto_now=False,  null=True, blank=True)
-    wrkreq_tl=models.ForeignKey(user_registration,on_delete=models.CASCADE,related_name='wrk_tl',null=True,blank=True)
-    wrk_status=models.CharField(max_length=200,null=True, blank=True,default='')
-
-
 class Projectmanagerworkassign(models.Model):
     pm_project_task=models.ForeignKey(project_taskassign,on_delete=models.CASCADE,related_name='pm_prtask',null=True,blank=True)
     assing_date=models.DateField(auto_now_add=True, auto_now=False,  null=True, blank=True)
@@ -1005,44 +991,30 @@ class ProjectBudgect(models.Model):
     pb_title=models.CharField(max_length=255,null=True, blank=True,default='')
     pb_status=models.CharField(max_length=200,null=True, blank=True,default='')
     pb_amount=models.IntegerField(null=True,blank=True,default=0)
+   
     
-#  New model fo leads registraion 24/02/23
-class Leads_Register(models.Model):
-    r_fullname=models.CharField(max_length=200,null=True, blank=True,default='')
-    r_email=models.EmailField(default='')
-    r_phno=models.CharField(max_length=200,null=True, blank=True,default='')
-    r_place=models.CharField(max_length=200,null=True, blank=True,default='')
-    r_qulific=models.CharField(max_length=200,null=True, blank=True,default='')
-    r_refference=models.ForeignKey(user_registration,on_delete=models.CASCADE,related_name='lead_regi',null=True,blank=True)
-    r_assing_id=models.ForeignKey(user_registration,on_delete=models.CASCADE,related_name='lead_assign',null=True,blank=True)
-    r_assign_date=models.DateField(auto_now_add=False, auto_now=False,  null=True, blank=True)
-    r_assign_status=models.IntegerField(null=True,blank=True,default=0)
-    r_date=models.DateField(auto_now_add=True, auto_now=False,  null=True, blank=True)
-    r_wating_date=models.DateField(null=True, blank=True)
-    r_dese=models.TextField(default='')
-    r_lead_source=models.CharField(max_length=200,null=True, blank=True,default='')
-    r_pass_out_year=models.CharField(max_length=1000,null=True, blank=True,default='')
-    r_status=models.IntegerField(null=True,blank=True,default=0)
-    r_completed_date=models.DateField(auto_now_add=False, auto_now=False,  null=True, blank=True)
-    r_type_status=models.CharField(max_length=200,null=True, blank=True,default='')
-    r_type=models.CharField(max_length=200,null=True, blank=True,default='')
-    r_fre_exp=models.CharField(max_length=200,null=True, blank=True,default='')
+class PM_ProjectDocument(models.Model):
+    doc_project_id=models.ForeignKey(project,on_delete=models.CASCADE,null=True,blank=True)
+    doc_project_name=models.CharField(max_length=100,null=True, blank=True)
+    doc_project_currentdate=models.DateField(auto_now_add=True, auto_now=False,  null=True, blank=True)
+    doc_project_startdate=models.DateField(auto_now_add=False, auto_now=False,  null=True, blank=True)
+    doc_project_enddate=models.DateField(auto_now_add=False, auto_now=False,  null=True, blank=True)
+    doc_project_frontend=models.CharField(max_length=100,null=True, blank=True)
+    doc_project_backend=models.CharField(max_length=100,null=True, blank=True)
+    doc_status=models.CharField(max_length=10,null=True, blank=True,default='0')
+    doc_project_ui=models.FileField(upload_to="ProjectUI", null=True)
+    
+class ProjectDocDetails(models.Model):
+    doc_project_d=models.ForeignKey(project,on_delete=models.CASCADE,null=True,blank=True)
+    doc_project_currentdate_d=models.DateField(auto_now_add=True, auto_now=False,  null=True, blank=True)
+    doc_project_mdname=models.CharField(max_length=100,null=True, blank=True)
+    doc_project_mddise_d=models.TextField()
+    doc_duser=models.ForeignKey(user_registration,on_delete=models.CASCADE,null=True,blank=True)
 
-class LeadExtradata(models.Model):
-    leadid=models.ForeignKey(Leads_Register,on_delete=models.CASCADE,related_name='lead_id',null=True,blank=True)
-    lead_ex_head=models.CharField(max_length=200,null=True, blank=True,default='')
-    lead_ex_data=models.TextField(default='')
-
-
-# Certficate Approvel table , Use in -  Office Admin Module
-
-class Certificate_approve(models.Model):
-    cf_develp=models.ForeignKey(user_registration,on_delete=models.CASCADE,related_name='Certificate_user',null=True,blank=True)
-    cf_intern=models.ForeignKey(internship,on_delete=models.CASCADE,related_name='Intern_Certificate_user',null=True,blank=True)
-    cf_category=models.IntegerField(null=True,blank=True,default=0)
-    cf_certificate=models.CharField(max_length=200,null=True, blank=True,default='')
-    cf_request_date=models.DateField(auto_now_add=True, auto_now=False,  null=True, blank=True)
-    cf_approve_date=models.DateField(auto_now_add=False, auto_now=False,  null=True, blank=True)
-    cf_status=models.IntegerField(null=True,blank=True,default=0)
-
-
+class ProjectDocModels(models.Model):
+    doc_project_md=models.ForeignKey(project,on_delete=models.CASCADE,null=True,blank=True)
+    doc_project_currentdate_md=models.DateField(auto_now_add=True, auto_now=False,  null=True, blank=True)
+    doc_project_mdname=models.CharField(max_length=100,null=True, blank=True)
+    doc_project_dise_md=models.TextField()
+    doc_mduser=models.ForeignKey(user_registration,on_delete=models.CASCADE,null=True,blank=True)
+    

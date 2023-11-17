@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.urls import re_path, include,path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.static import serve
 from base_app import views
 from cal import views as calviews
@@ -36,7 +37,6 @@ urlpatterns = [
 
     re_path(r'^new_team1/$', views.new_team1, name='new_team1'),
      path('new_batch',views.new_batch, name='new_batch'),
-    path('batch_complete/<int:pk>/',views.batch_complete, name='batch_complete'),
      path('team_trainee/<int:tm_tnr>/',views.team_trainee, name='team_trainee'),
      path('trainee_delete/<int:tm_trainee>/',views.trainee_delete, name='trainee_delete'),
     re_path(r'^newteamcreate/$', views.newteamcreate, name='newteamcreate'),
@@ -120,7 +120,6 @@ urlpatterns = [
     re_path(r'^Ptdetails/(?P<id>\d+)$', views.Ptdetails, name='Ptdetails'),
     re_path(r'^traineedetails/(?P<id>\d+)$',
             views.traineedetails, name="traineedetails"),
- path('taineestatuschange/<int:pk>',views.taineestatuschange, name='taineestatuschange'),
 
 
 
@@ -141,8 +140,8 @@ urlpatterns = [
     re_path(r'^trainer_reportissue/$', views.trainer_reportissue,
             name='trainer_reportissue'),
     path('trainer_feedbacks', views.trainer_feedbacks, name='trainer_feedbacks'),  
-     path('trainer_give_feedback', views.trainer_give_feedback, name='trainer_give_feedback'),  
-     path('trainer_given_feedback', views.trainer_given_feedback, name='trainer_given_feedback'),       
+    path('trainer_give_feedback', views.trainer_give_feedback, name='trainer_give_feedback'),  
+    path('trainer_given_feedback', views.trainer_given_feedback, name='trainer_given_feedback'),       
     re_path(r'^trainer_reportissue_form/$',
             views.trainer_reportissue_form, name='trainer_reportissue_form'),
     re_path(r'^trainer_reportedissue_table/$',
@@ -529,15 +528,6 @@ urlpatterns = [
 
     # re_path(r'^BRadmin_profiledash$', views.BRadmin_profiledash,name='BRadmin_profiledash'),
     re_path(r'^BRadmin_dept/$', views.BRadmin_dept, name='BRadmin_dept'),
-    path('BRadmin_leads', views.BRadmin_leads, name='BRadmin_leads'),
-    path('BRadmin_currentleads', views.BRadmin_currentleads, name='BRadmin_currentleads'), 
-    path('BRadmin_watingleads', views.BRadmin_watingleads, name='BRadmin_watingleads'),
-    path('BRadmin_confirmedleads', views.BRadmin_confirmedleads, name='BRadmin_confirmedleads'),
-    path('BRadmin_internshipleads', views.BRadmin_internshipleads, name='BRadmin_internshipleads'),
-    path('BRadmin_jobleads', views.BRadmin_jobleads, name='BRadmin_jobleads'),
-    
-    
-    
     re_path(r'^BRadmin_pythons/$', views.BRadmin_pythons, name='BRadmin_pythons'),
     re_path(r'^BRadmin_projects/(?P<id>\d+)/$',
             views.BRadmin_projects, name='BRadmin_projects'),
@@ -740,7 +730,7 @@ urlpatterns = [
     re_path(r'^leave1/$', views.leave1,name='leave1'),
     re_path(r'^registration/$', views.man_registration_form,name='man_registration_form'),
    
-#     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
+
 
 
     #Project manager
@@ -752,12 +742,11 @@ urlpatterns = [
     path('pm_Work_not_assign', views.pm_Work_not_assign, name='pm_Work_not_assign'),
     path('pmdeveloper_task_assign/<int:pmdev_id>', views.pmdeveloper_task_assign, name='pmdeveloper_task_assign'),
     path('pmproject_task_assingdev', views.pmproject_task_assingdev, name='pmproject_task_assingdev'),
-    path('pmstart_new_document>', views.pmstart_new_document, name='pmstart_new_document'),
-    path('pm_doc_upload>', views.pm_doc_upload, name='pm_doc_upload'),
 
 
     #nirmal
     re_path(r'^projectmanager_assignproject/', views.projectmanager_assignproject, name="projectmanager_assignproject"),
+    re_path(r'^mandesig_promanager/', views.mandesig_promanager, name="mandesig_promanager"),
     path('pmprojectmodule', views.pmprojectmodule, name='pmprojectmodule'),
     path('uiupdate', views.uiupdate, name='uiupdate'),
     
@@ -912,6 +901,7 @@ urlpatterns = [
     re_path(r'^devreportissue/$', views.devreportissue, name='devreportissue'),
     re_path(r'^devreportedissue/$', views.devreportedissue, name='devreportedissue'),
     path('Dev_workrequest/<int:dev_wrequest>', views.Dev_workrequest, name='Dev_workrequest'),
+    path('DEVaction>', views.DEVaction, name='DEVaction'),
 
     re_path(r'^devsuccess/$', views.devsuccess, name='devsuccess'),
     re_path(r'^devissues/(?P<id>\d+)/$', views.devissues, name='devissues'),
@@ -1084,7 +1074,7 @@ urlpatterns = [
 
     # re_path(r'^accounts_internship_viewall/', views.accounts_internship_viewall, name="accounts_internship_viewall"),
     
-re_path(r'^accounts_internship/', views.accounts_internship, name="accounts_internship"),
+    re_path(r'^accounts_internship/', views.accounts_internship, name="accounts_internship"),
     re_path(r'^accounts_internship_payment_pending/', views.accounts_internship_payment_pending, name="accounts_internship_payment_pending"),
     re_path(r'^addamount/(?P<id>\d+)/', views.addamount, name="addamount"),
     re_path(r'^accounts_internship_type_sel/(?P<id>\d+)/', views.accounts_internship_type_sel, name="accounts_internship_type_sel"),
@@ -1375,63 +1365,37 @@ re_path(r'^accounts_internship/', views.accounts_internship, name="accounts_inte
     
     # *************************HR MODULE*******************************
 
-     re_path(r'^HR_Dashboard/$', views.HR_Dashboard, name='HR_Dashboard'),
-     re_path(r'^HR_leave/$', views.HR_leave, name='HR_leave'),
-     re_path(r'^HR_leaveapply/$', views.HR_leaveapply, name='HR_leaveapply'),
-     re_path(r'^HR_appliedleave/$', views.HR_appliedleave, name='HR_appliedleave'),
-     re_path(r'^HR_issue/$', views.HR_issue, name='HR_issue'),
-     re_path(r'^HR_reportissue/$', views.HR_reportissue, name='HR_reportissue'),
-     re_path(r'^HR_reportedissue/$', views.HR_reportedissue, name='HR_reportedissue'),
-     re_path(r'^HR_trainingdepartment/$', views.HR_trainingdepartment, name='HR_trainingdepartment'),
-     re_path(r'^HR_trainerslist/(?P<id>\d+)/$', views.HR_trainerslist, name='HR_trainerslist'),
-     re_path(r'^HR_trainersteam/(?P<id>\d+)/$', views.HR_trainersteam, name='HR_trainersteam'),
-     re_path(r'^HR_trainersteamdetails/(?P<id>\d+)/$', views.HR_trainersteamdetails, name='HR_trainersteamdetails'),
-     re_path(r'^HR_trainees/(?P<id>\d+)/$', views.HR_trainees, name='HR_trainees'),
-     re_path(r'^HR_traineestopic/(?P<id>\d+)/$', views.HR_traineestopic, name='HR_traineestopic'),
-     re_path(r'^HR_traineeprofile/(?P<id>\d+)/$', views.HR_traineeprofile, name='HR_traineeprofile'),
-     re_path(r'^HR_traineecompletedtask/(?P<id>\d+)/$', views.HR_traineecompletedtask, name='HR_traineecompletedtask'),
-     re_path(r'^HR_employeesdepartment/$', views.HR_employeesdepartment, name='HR_employeesdepartment'),
-     re_path(r'^HR_employeeslist/(?P<id>\d+)/$', views.HR_employeeslist, name='HR_employeeslist'),
-     re_path(r'^HR_viewtrainers/(?P<id>\d+)/(?:(?P<did>\d+))?', views.HR_viewtrainers, name='HR_viewtrainers'),
-     re_path(r'^HR_trainerprofile/(?P<id>\d+)/$', views.HR_trainerprofile, name='HR_trainerprofile'),
-     re_path(r'^HR_trainercurrenttrainees/(?P<id>\d+)/$', views.HR_trainercurrenttrainees, name='HR_trainercurrenttrainees'),
-     re_path(r'^HR_trainerprevioustrainees/(?P<id>\d+)/$', views.HR_trainerprevioustrainees, name='HR_trainerprevioustrainees'),
-     re_path(r'^HR_trainersattendance/(?P<id>\d+)/$', views.HR_trainersattendance, name='HR_trainersattendance'),
-     re_path(r'^HR_trainersattendanceview/(?P<id>\d+)/$', views.HR_trainersattendanceview, name='HR_trainersattendanceview'),
-     re_path(r'^HR_employeedetails/(?P<id>\d+)/(?:(?P<did>\d+))?', views.HR_employeedetails, name='HR_employeedetails'),
-     re_path(r'^HR_employeesprofile/(?P<id>\d+)/$', views.HR_employeesprofile, name='HR_employeesprofile'),
-     re_path(r'^HR_employeesinvolvedprojects/(?P<id>\d+)/(?:(?P<did>\d+))?', views.HR_employeesinvolvedprojects, name='HR_employeesinvolvedprojects'),
-     re_path(r'^HR_employeesattendance/(?P<id>\d+)/$', views.HR_employeesattendance, name='HR_employeesattendance'),
-     re_path(r'^HR_employeesattendancesort/(?P<id>\d+)/$', views.HR_employeesattendancesort, name='HR_employeesattendancesort'),
-     re_path(r'^HR_changepassword/$', views.HR_changepassword, name='HR_changepassword'),
-     re_path(r'^HR_accountsettings/$', views.HR_accountsettings, name='HR_accountsettings'),
-     re_path(r'^HR_imagesettings/$', views.HR_imagesettings, name='HR_imagesettings'),
-
-    # new urls added to Hr Module - 24/02/2023 
-    path('HR_training_leads', views.HR_training_leads, name='HR_training_leads'), 
-    path('HR_upcoming_leads', views.HR_upcoming_leads, name='HR_upcoming_leads'),  
-    path('HR_current_leads', views.HR_current_leads, name='HR_current_leads'),  
-    path('HR_Waiting_leads', views.HR_Waiting_leads, name='HR_Waiting_leads'), 
-    path('HR_leads_expfre/<int:pk>', views.HR_leads_expfre, name='HR_leads_expfre'),
-    path('HR_Joined', views.HR_Joined, name='HR_Joined'),
-    path('HR_add_leads', views.HR_add_leads, name='HR_add_leads'),
-    path('HR_register_lead', views.HR_register_lead, name='HR_register_lead'),
-    path('check_email', views.check_email, name='check_email'),
-    path('check_phone', views.check_phone, name='check_phone'),
-    
-
-    path('HR_lead_accept/<int:pk>', views.HR_lead_accept, name='HR_lead_accept'),
-    path('HR_lead_reject/<int:pk>', views.HR_lead_reject, name='HR_lead_reject'),
-    path('HR_update_lead_status/<int:pk>', views.HR_update_lead_status, name='HR_update_lead_status'),
-    path('HR_update_lead_data/<int:pk>', views.HR_update_lead_data, name='HR_update_lead_data'),
-    path('HR_update_lead_confirm/<int:pk>', views.HR_update_lead_confirm, name='HR_update_lead_confirm'),
-    
-    
-    
-    
-      
-    
-
+    re_path(r'^HR_Dashboard/$', views.HR_Dashboard, name='HR_Dashboard'),
+    re_path(r'^HR_leave/$', views.HR_leave, name='HR_leave'),
+    re_path(r'^HR_leaveapply/$', views.HR_leaveapply, name='HR_leaveapply'),
+    re_path(r'^HR_appliedleave/$', views.HR_appliedleave, name='HR_appliedleave'),
+    re_path(r'^HR_issue/$', views.HR_issue, name='HR_issue'),
+    re_path(r'^HR_reportissue/$', views.HR_reportissue, name='HR_reportissue'),
+    re_path(r'^HR_reportedissue/$', views.HR_reportedissue, name='HR_reportedissue'),
+    re_path(r'^HR_trainingdepartment/$', views.HR_trainingdepartment, name='HR_trainingdepartment'),
+    re_path(r'^HR_trainerslist/(?P<id>\d+)/$', views.HR_trainerslist, name='HR_trainerslist'),
+    re_path(r'^HR_trainersteam/(?P<id>\d+)/$', views.HR_trainersteam, name='HR_trainersteam'),
+    re_path(r'^HR_trainersteamdetails/(?P<id>\d+)/$', views.HR_trainersteamdetails, name='HR_trainersteamdetails'),
+    re_path(r'^HR_trainees/(?P<id>\d+)/$', views.HR_trainees, name='HR_trainees'),
+    re_path(r'^HR_traineestopic/(?P<id>\d+)/$', views.HR_traineestopic, name='HR_traineestopic'),
+    re_path(r'^HR_traineeprofile/(?P<id>\d+)/$', views.HR_traineeprofile, name='HR_traineeprofile'),
+    re_path(r'^HR_traineecompletedtask/(?P<id>\d+)/$', views.HR_traineecompletedtask, name='HR_traineecompletedtask'),
+    re_path(r'^HR_employeesdepartment/$', views.HR_employeesdepartment, name='HR_employeesdepartment'),
+    re_path(r'^HR_employeeslist/(?P<id>\d+)/$', views.HR_employeeslist, name='HR_employeeslist'),
+    re_path(r'^HR_viewtrainers/(?P<id>\d+)/(?:(?P<did>\d+))?', views.HR_viewtrainers, name='HR_viewtrainers'),
+    re_path(r'^HR_trainerprofile/(?P<id>\d+)/$', views.HR_trainerprofile, name='HR_trainerprofile'),
+    re_path(r'^HR_trainercurrenttrainees/(?P<id>\d+)/$', views.HR_trainercurrenttrainees, name='HR_trainercurrenttrainees'),
+    re_path(r'^HR_trainerprevioustrainees/(?P<id>\d+)/$', views.HR_trainerprevioustrainees, name='HR_trainerprevioustrainees'),
+    re_path(r'^HR_trainersattendance/(?P<id>\d+)/$', views.HR_trainersattendance, name='HR_trainersattendance'),
+    re_path(r'^HR_trainersattendanceview/(?P<id>\d+)/$', views.HR_trainersattendanceview, name='HR_trainersattendanceview'),
+    re_path(r'^HR_employeedetails/(?P<id>\d+)/(?:(?P<did>\d+))?', views.HR_employeedetails, name='HR_employeedetails'),
+    re_path(r'^HR_employeesprofile/(?P<id>\d+)/$', views.HR_employeesprofile, name='HR_employeesprofile'),
+    re_path(r'^HR_employeesinvolvedprojects/(?P<id>\d+)/(?:(?P<did>\d+))?', views.HR_employeesinvolvedprojects, name='HR_employeesinvolvedprojects'),
+    re_path(r'^HR_employeesattendance/(?P<id>\d+)/$', views.HR_employeesattendance, name='HR_employeesattendance'),
+    re_path(r'^HR_employeesattendancesort/(?P<id>\d+)/$', views.HR_employeesattendancesort, name='HR_employeesattendancesort'),
+    re_path(r'^HR_changepassword/$', views.HR_changepassword, name='HR_changepassword'),
+    re_path(r'^HR_accountsettings/$', views.HR_accountsettings, name='HR_accountsettings'),
+    re_path(r'^HR_imagesettings/$', views.HR_imagesettings, name='HR_imagesettings'),
     re_path(r'^HR_logout/$', views.HR_logout, name='HR_logout'),  
      
     re_path(r'^completedteam/$', views.completedteam, name='completedteam'),
@@ -1587,18 +1551,18 @@ re_path(r'^accounts_internship/', views.accounts_internship, name="accounts_inte
     path('DM_project_task_assign/<int:proj_assign>',views.DM_project_task_assign, name='DM_project_task_assign'),
 
     #***************** genaral ************
-     path('DM_manager_attende', views.DM_manager_attende, name='DM_manager_attende'),
-     path('DM_manager_leave', views.DM_manager_leave, name='DM_manager_leave'),
-     path('DM_manager_report_isssue', views.DM_manager_report_isssue, name='DM_manager_report_isssue'),
-     path('DM_manager_payment', views.DM_manager_payment, name='DM_manager_payment'),
-     path('DM_manager_leave_apply', views.DM_manager_leave_apply, name='DM_manager_leave_apply'),
-     path('DM_manager_report', views.DM_manager_report, name='DM_manager_report'),
-     path('DM_project_full_tasks/<int:full_task_id>', views.DM_project_full_tasks, name='DM_project_full_tasks'),
-     path('Dm_report_data/<int:report_data>',views.Dm_report_data, name='Dm_report_data'),
-     path('DM_report_add', views.DM_report_add, name='DM_report_add'),
-     path('DM_report_full_data/<int:report_data_id>/<int:repoj_id>',views.DM_report_full_data, name='DM_report_full_data'),
-     path('Dm_datereport_data/<int:retask_id>/<int:repj_id>',views.Dm_datereport_data, name='Dm_datereport_data'),
-     path('DM_report_upload', views.DM_report_upload, name='DM_report_upload'),
+    path('DM_manager_attende', views.DM_manager_attende, name='DM_manager_attende'),
+    path('DM_manager_leave', views.DM_manager_leave, name='DM_manager_leave'),
+    path('DM_manager_report_isssue', views.DM_manager_report_isssue, name='DM_manager_report_isssue'),
+    path('DM_manager_payment', views.DM_manager_payment, name='DM_manager_payment'),
+    path('DM_manager_leave_apply', views.DM_manager_leave_apply, name='DM_manager_leave_apply'),
+    path('DM_manager_report', views.DM_manager_report, name='DM_manager_report'),
+    path('DM_project_full_tasks/<int:full_task_id>', views.DM_project_full_tasks, name='DM_project_full_tasks'),
+    path('Dm_report_data/<int:report_data>',views.Dm_report_data, name='Dm_report_data'),
+    path('DM_report_add', views.DM_report_add, name='DM_report_add'),
+    path('DM_report_full_data/<int:report_data_id>/<int:repoj_id>',views.DM_report_full_data, name='DM_report_full_data'),
+    path('Dm_datereport_data/<int:retask_id>/<int:repj_id>',views.Dm_datereport_data, name='Dm_datereport_data'),
+    path('DM_report_upload', views.DM_report_upload, name='DM_report_upload'),
 
 
 
@@ -1621,20 +1585,20 @@ re_path(r'^accounts_internship/', views.accounts_internship, name="accounts_inte
 
     #************  Digital Marketing 8 alocate task *******************************
 
-   path('devstart_task/<int:task_id>',views.devstart_task, name='devstart_task'),
-   path('devstart_task_submit/<int:task_submit>',views.devstart_task_submit, name='devstart_task_submit'),
-   path('data_collect_save/<int:task_dcid>',views.data_collect_save, name='data_collect_save'), 
-   path('dev_backlink_save/<int:bd_id>',views.dev_backlink_save, name='dev_backlink_save'),
-   path('dev_webpagecontent_save/<int:web_id>',views.dev_webpagecontent_save, name='dev_webpagecontent_save'), 
-   path('dev_webanalysi_save/<int:audit_id>',views.dev_webanalysi_save, name='dev_webanalysi_save'), 
-   path('dev_datacollect_client_save/<int:dcc_id>',views.dev_datacollect_client_save, name='dev_datacollect_client_save'), 
-   path('dev_onpage_save/<int:onpage_id>',views.dev_onpage_save, name='dev_onpage_save'), 
-   path('dev_onpge_edit_save/<int:onpage_edit>',views.dev_onpge_edit_save, name='dev_onpge_edit_save'),
-   path('dev_blog_calander_save/<int:blog_id>',views.dev_blog_calander_save, name='dev_blog_calander_save'), 
-   path('dev_smm_poster_save/<int:smm_id>',views.dev_smm_poster_save, name='dev_smm_poster_save'), 
+    path('devstart_task/<int:task_id>',views.devstart_task, name='devstart_task'),
+    path('devstart_task_submit/<int:task_submit>',views.devstart_task_submit, name='devstart_task_submit'),
+    path('data_collect_save/<int:task_dcid>',views.data_collect_save, name='data_collect_save'), 
+    path('dev_backlink_save/<int:bd_id>',views.dev_backlink_save, name='dev_backlink_save'),
+    path('dev_webpagecontent_save/<int:web_id>',views.dev_webpagecontent_save, name='dev_webpagecontent_save'), 
+    path('dev_webanalysi_save/<int:audit_id>',views.dev_webanalysi_save, name='dev_webanalysi_save'), 
+    path('dev_datacollect_client_save/<int:dcc_id>',views.dev_datacollect_client_save, name='dev_datacollect_client_save'), 
+    path('dev_onpage_save/<int:onpage_id>',views.dev_onpage_save, name='dev_onpage_save'), 
+    path('dev_onpge_edit_save/<int:onpage_edit>',views.dev_onpge_edit_save, name='dev_onpge_edit_save'),
+    path('dev_blog_calander_save/<int:blog_id>',views.dev_blog_calander_save, name='dev_blog_calander_save'), 
+    path('dev_smm_poster_save/<int:smm_id>',views.dev_smm_poster_save, name='dev_smm_poster_save'), 
 
    #**************************** task View******************
-   path('devdata_collect_view/<int:dc_view>',views.devdata_collect_view, name='devdata_collect_view'), 
+    path('devdata_collect_view/<int:dc_view>',views.devdata_collect_view, name='devdata_collect_view'), 
 
 
    #********************************** Admin -Digital Marketing section 19-10-22
@@ -1644,20 +1608,20 @@ re_path(r'^accounts_internship/', views.accounts_internship, name="accounts_inte
   
 
   #*************** Excel File Download  
- path('excel_file_download/<int:dwl_task>/<int:dwd_prj_id>', views.excel_file_download, name='excel_file_download'),
- path('Dm_datereport_download_data/<int:drep_task>', views.Dm_datereport_download_data, name='Dm_datereport_download_data'),
- path('Dm_project_report_download', views.Dm_project_report_download, name='Dm_project_report_download'),
+    path('excel_file_download/<int:dwl_task>/<int:dwd_prj_id>', views.excel_file_download, name='excel_file_download'),
+    path('Dm_datereport_download_data/<int:drep_task>', views.Dm_datereport_download_data, name='Dm_datereport_download_data'),
+    path('Dm_project_report_download', views.Dm_project_report_download, name='Dm_project_report_download'),
 
 
  #*********************************** Tester verify **********************
-  path('TSproject_verifiy/<int:ts_task_verify>', views.TSproject_verifiy, name='TSproject_verifiy'),
-  path('TSproject_status_confirm/<int:ts_prj_task_verify>', views.TSproject_status_confirm, name='TSproject_status_confirm'),
+    path('TSproject_verifiy/<int:ts_task_verify>', views.TSproject_verifiy, name='TSproject_verifiy'),
+    path('TSproject_status_confirm/<int:ts_prj_task_verify>', views.TSproject_status_confirm, name='TSproject_status_confirm'),
 
 
   #******************************** Admin- shebin (23/10/22)*******************
-   path('BRadmin_project_tester', views.BRadmin_project_tester, name='BRadmin_project_tester'),
-   path('BRadmin_tester_project_list/<int:BRadmin_prj_list>', views.BRadmin_tester_project_list, name='BRadmin_tester_project_list'),
-   path('BRadmin_dev_project_task/<int:BRadmin_dev_prj_task>', views.BRadmin_dev_project_task, name='BRadmin_dev_project_task'),
+    path('BRadmin_project_tester', views.BRadmin_project_tester, name='BRadmin_project_tester'),
+    path('BRadmin_tester_project_list/<int:BRadmin_prj_list>', views.BRadmin_tester_project_list, name='BRadmin_tester_project_list'),
+    path('BRadmin_dev_project_task/<int:BRadmin_dev_prj_task>', views.BRadmin_dev_project_task, name='BRadmin_dev_project_task'),
 
    #********************************* Admin Auidit Digital Marketing shebin Shaji 25/10/22
     path('BRadmin_audit', views.BRadmin_audit, name='BRadmin_audit'),
@@ -1676,64 +1640,66 @@ re_path(r'^accounts_internship/', views.accounts_internship, name="accounts_inte
     path('BRadmin_audit_dm_salarysearch/<int:BRadmin_aud_dmemp_ssalry>', views.BRadmin_audit_dm_salarysearch, name='BRadmin_audit_dm_salarysearch'),
     path('BRadmin_audit_dmemp_works/<int:BRadmin_aud_dmemp_work>', views.BRadmin_audit_dmemp_works, name='BRadmin_audit_dmemp_works'),
     path('BRadmin_audit_Works_tasks/<int:BRadmin_adu_dmwt>/<int:BRadmin_aud_dmw>', views.BRadmin_audit_Works_tasks, name='BRadmin_audit_Works_tasks'),   
-   path('BRadmin_audit_dm_tasksearch/<int:BRadmin_aud_stask>', views.BRadmin_audit_dm_tasksearch, name='BRadmin_audit_dm_tasksearch'),
+    path('BRadmin_audit_dm_tasksearch/<int:BRadmin_aud_stask>', views.BRadmin_audit_dm_tasksearch, name='BRadmin_audit_dm_tasksearch'),
 
 
  #************************************* Project manager Document section
-   path('projectManager_project_document', views.projectManager_project_document, name='projectManager_project_document'),
-   path('project_manager_doc_start/<int:pmdoc_id>', views.project_manager_doc_start, name='project_manager_doc_start'),
-   path('project_manager_doc_module/<int:pmdoc_md_id>', views.project_manager_doc_module, name='project_manager_doc_module'),
-   path('project_manager_usermanuvel/<int:pm_usermanuvel_id>', views.project_manager_usermanuvel, name='project_manager_usermanuvel'),
-   path('pm_usermanuvel_add/<int:pm_usermanuveladd>', views.pm_usermanuvel_add, name='pm_usermanuvel_add'),
+    path('projectManager_project_document', views.projectManager_project_document, name='projectManager_project_document'),
+    path('project_manager_doc_start/<int:pmdoc_id>', views.project_manager_doc_start, name='project_manager_doc_start'),
+    path('project_manager_doc_module/<int:pmdoc_md_id>', views.project_manager_doc_module, name='project_manager_doc_module'),
+    path('project_manager_usermanuvel/<int:pm_usermanuvel_id>', views.project_manager_usermanuvel, name='project_manager_usermanuvel'),
+    path('pm_usermanuvel_add/<int:pm_usermanuveladd>', views.pm_usermanuvel_add, name='pm_usermanuvel_add'),
     path('pm_userpoints_add', views.pm_userpoints_add, name='pm_userpoints_add'),
    
-   path('pm_doc_corre_updattion/<int:pmdoc_pid>/<int:pmdoc_cu>', views.pm_doc_corre_updattion, name='pm_doc_corre_updattion'),
-   path('pm_doc_complete/<int:pmdoc_complete>', views.pm_doc_complete, name='pm_doc_complete'),
-   path('projectmanager_completedoc/<int:pm_comp_doc>', views.projectmanager_completedoc, name='projectmanager_completedoc'),
+    path('pm_doc_corre_updattion/<int:pmdoc_pid>/<int:pmdoc_cu>', views.pm_doc_corre_updattion, name='pm_doc_corre_updattion'),
+    path('pm_doc_complete/<int:pmdoc_complete>', views.pm_doc_complete, name='pm_doc_complete'),
+    path('projectmanager_completedoc/<int:pm_comp_doc>', views.projectmanager_completedoc, name='projectmanager_completedoc'),
 
    ############## document section ########################
-   path('pm_doc_pdf/<int:fulldoc_pdf>', views.pm_doc_pdf, name='pm_doc_pdf'),
-   path('pm_doc_des_pdf/<int:desedoc_pdf>', views.pm_doc_des_pdf, name='pm_doc_des_pdf'),
-   path('pm_doc_corr_pdf/<int:corredoc_pdf>', views.pm_doc_corr_pdf, name='pm_doc_corr_pdf'),
-   path('pm_doc_updt_pdf/<int:updedoc_pdf>', views.pm_doc_updt_pdf, name='pm_doc_updt_pdf'),
-   path('pm_docfull_pdf/<int:pmfulldocs_pdf>', views.pm_docfull_pdf, name='pm_docfull_pdf'),
-   path('pm_doccode_pdf/<int:pm_code_pdf>', views.pm_doccode_pdf, name='pm_doccode_pdf'),
+    path('pm_doc_pdf/<int:fulldoc_pdf>', views.pm_doc_pdf, name='pm_doc_pdf'),
+    path('pm_doc_des_pdf/<int:desedoc_pdf>', views.pm_doc_des_pdf, name='pm_doc_des_pdf'),
+    path('pm_doc_corr_pdf/<int:corredoc_pdf>', views.pm_doc_corr_pdf, name='pm_doc_corr_pdf'),
+    path('pm_doc_updt_pdf/<int:updedoc_pdf>', views.pm_doc_updt_pdf, name='pm_doc_updt_pdf'),
+    path('pm_docfull_pdf/<int:pmfulldocs_pdf>', views.pm_docfull_pdf, name='pm_docfull_pdf'),
+    path('pm_doccode_pdf/<int:pm_code_pdf>', views.pm_doccode_pdf, name='pm_doccode_pdf'),
+    path('pmstart_new_document>', views.pmstart_new_document, name='pmstart_new_document'),
+    path('pm_doc_upload>', views.pm_doc_upload, name='pm_doc_upload'),
 
 
    #************************ Tl project document section
-   path('Tl_ptoject_doc/<int:tlproj_id>', views.Tl_ptoject_doc, name='Tl_ptoject_doc'),
-   path('get_instances', views.get_instances, name='get_instances'),
-   path('TLproject_doc_emp_save/<int:TLprj_docemp>', views.TLproject_doc_emp_save, name='TLproject_doc_emp_save'),
+    path('Tl_ptoject_doc/<int:tlproj_id>', views.Tl_ptoject_doc, name='Tl_ptoject_doc'),
+    path('get_instances', views.get_instances, name='get_instances'),
+    path('TLproject_doc_emp_save/<int:TLprj_docemp>', views.TLproject_doc_emp_save, name='TLproject_doc_emp_save'),
 
 
   #************************** Develper project document section **************
-  path('DEV_projrect_doc/<int:dev_prjdoc_id>', views.DEV_projrect_doc, name='DEV_projrect_doc'),
-  path('docrequirements/<int:dev_prjredoc_id>', views.docrequirements, name='docrequirements'),
-  path('DEV_project_FB/<int:dev_prj_fb>', views.DEV_project_FB, name='DEV_project_FB'),
-  path('DEV_corr_up/<int:dev_prj_cu_id>', views.DEV_corr_up, name='DEV_corr_up'),
-  path('DEV_project_doc_daily_doc_add/<int:DEV_pdocdaily>', views.DEV_project_doc_daily_doc_add, name='DEV_project_doc_daily_doc_add'),
+    path('DEV_projrect_doc/<int:dev_prjdoc_id>', views.DEV_projrect_doc, name='DEV_projrect_doc'),
+    path('docrequirements/<int:dev_prjredoc_id>', views.docrequirements, name='docrequirements'),
+    path('DEV_project_FB/<int:dev_prj_fb>', views.DEV_project_FB, name='DEV_project_FB'),
+    path('DEV_corr_up/<int:dev_prj_cu_id>', views.DEV_corr_up, name='DEV_corr_up'),
+    path('DEV_project_doc_daily_doc_add/<int:DEV_pdocdaily>', views.DEV_project_doc_daily_doc_add, name='DEV_project_doc_daily_doc_add'),
 
 
 
    #***************** tl project task delay *******************
-   path('TLproject_task_delay', views.TLproject_task_delay, name='TLproject_task_delay'),
-   path('TL_warning/<int:Tltask_id>', views.TL_warning, name='TL_warning'),
+    path('TLproject_task_delay', views.TLproject_task_delay, name='TLproject_task_delay'),
+    path('TL_warning/<int:Tltask_id>', views.TL_warning, name='TL_warning'),
 
    #project manager project Tl/developer delay
-   path('projectManager_project_delay', views.projectManager_project_delay, name='projectManager_project_delay'),
-   path('projectManager_warning/<int:pmtaskwr_id>', views.projectManager_warning, name='projectManager_warning'),
+    path('projectManager_project_delay', views.projectManager_project_delay, name='projectManager_project_delay'),
+    path('projectManager_warning/<int:pmtaskwr_id>', views.projectManager_warning, name='projectManager_warning'),
 
    #admin project PM/TL/Developer
-   path('BRadmin_project_delay_action/<int:BRadmin_dep_dely>', views.BRadmin_project_delay_action, name='BRadmin_project_delay_action'),
-   path('BRadmin_project_budgect/<int:BRadmin_bud>', views.BRadmin_project_budgect, name='BRadmin_project_budgect'),
-   path('BRadmin_budgect_add/<int:BRadmin_pb>', views.BRadmin_budgect_add, name='BRadmin_budgect_add'),
+    path('BRadmin_project_delay_action/<int:BRadmin_dep_dely>', views.BRadmin_project_delay_action, name='BRadmin_project_delay_action'),
+    path('BRadmin_project_budgect/<int:BRadmin_bud>', views.BRadmin_project_budgect, name='BRadmin_project_budgect'),
+    path('BRadmin_budgect_add/<int:BRadmin_pb>', views.BRadmin_budgect_add, name='BRadmin_budgect_add'),
     path('BRAdmin_section_complete/<int:BRadmin_sect_id>', views.BRAdmin_section_complete, name='BRAdmin_section_complete'),
 
 
 
    #************************ Admin project Dcuments section **************************
-   path('BRadmin_project_document/<int:Bradmin_dep_id>', views.BRadmin_project_document, name='BRadmin_project_document'),
-   path('BRadmin_project_doc_detail/<int:BRadmin_pdocv_id>', views.BRadmin_project_doc_detail, name='BRadmin_project_doc_detail'),
+    path('BRadmin_project_document/<int:Bradmin_dep_id>', views.BRadmin_project_document, name='BRadmin_project_document'),
+    path('BRadmin_project_doc_detail/<int:BRadmin_pdocv_id>', views.BRadmin_project_doc_detail, name='BRadmin_project_doc_detail'),
    
 
    #----------------------------- Audit Module ---------------4/11/22 shebin Shaji ------------------------
@@ -1746,7 +1712,6 @@ re_path(r'^accounts_internship/', views.accounts_internship, name="accounts_inte
     path('Audit_trainee_trainer_dashboard/<int:audit_traine_id>', views.Audit_trainee_trainer_dashboard, name='Audit_trainee_trainer_dashboard'),
     path('Audit_trainee_trainer_details/<int:audit_ttrainer_id>/<int:audit_tm_id>/<int:audit_trn_id>', views.Audit_trainee_trainer_details, name='Audit_trainee_trainer_details'),
     path('audit_probation/<int:audit_tr_prob>', views.audit_probation, name='audit_probation'),
-    path('Audit-Trainee-Report/<int:PDF_traineer_id>', views.audit_trainee_reportPDF, name='audit_trainee_reportPDF'),
 
 #Trainer
     path('audit_trainer_teamview/<int:audit_trainer_tmid>', views.audit_trainer_teamview, name='audit_trainer_teamview'),
@@ -1756,7 +1721,6 @@ re_path(r'^accounts_internship/', views.accounts_internship, name="accounts_inte
     path('Audit_department/<int:audit_dep_id>', views.Audit_department, name='Audit_department'),
     path('Audit_emp_list/<int:audit_depart_id>/<int:audit_des_id>', views.Audit_emp_list, name='Audit_emp_list'),
     path('Audit_emp_reportpdf/<int:audit_rep_id>', views.Audit_emp_reportpdf, name='Audit_emp_reportpdf'), 
-    path('Audit_empdaily_reportpdf/<int:audit_rep_id>', views.Audit_empdaily_reportpdf, name='Audit_empdaily_reportpdf'),
     path('Audit_employee_dashbord/<int:audit_emp_id>', views.Audit_employee_dashbord, name='Audit_employee_dashbord'),
     path('Audit_trainee_dashboard/<int:audit_emp_tr>', views.Audit_trainee_dashboard, name='Audit_trainee_dashboard'),
     path('Audit_salary_hold/<int:holdid>', views.Audit_salary_hold, name='Audit_salary_hold'),
@@ -1776,131 +1740,39 @@ re_path(r'^accounts_internship/', views.accounts_internship, name="accounts_inte
     path('usermauvel_pdf/<int:um_pdf>', views.usermauvel_pdf, name='usermauvel_pdf'),
 
 # Action Taken
- path('Audit_action_taken>', views.Audit_action_taken, name='Audit_action_taken'),
+    path('Audit_action_taken>', views.Audit_action_taken, name='Audit_action_taken'),
+    path('Projectmanager_action_taken>', views.Projectmanager_action_taken, name='Projectmanager_action_taken'),
+    path('TL_action_taken>', views.TL_action_taken, name='TL_action_taken'),
+    path('BRadmin_action_taken>', views.BRadmin_action_taken, name='BRadmin_action_taken'),
+    
+    path('pm_leavedesgn>', views.pm_leavedesgn, name='pm_leavedesgn'),  
+    path('pm_emp_ajax>', views.pm_emp_ajax, name='pm_emp_ajax'),  
+    path('tl_leavedesgn>', views.tl_leavedesgn, name='tl_leavedesgn'),  
+    path('tl_emp_ajax>', views.tl_emp_ajax, name='tl_emp_ajax'), 
+    
+    path('Audit_tester_works>/<int:pk>', views.Audit_tester_works, name='Audit_tester_works'),
+    path('Audit_tester_works_view>/<int:pk>', views.Audit_tester_works_view, name='Audit_tester_works_view'),
+    
+    #-----------Shebin-------------
+    path('Audit_designation_list>', views.Audit_designation_list, name='Audit_designation_list'),
+    path('Audit_designationemp_list>', views.Audit_designationemp_list, name='Audit_designationemp_list'),
+    
+    path('taineestatuschange/<int:pk>',views.taineestatuschange, name='taineestatuschange'),
+    path('batch_complete/<int:pk>/',views.batch_complete, name='batch_complete'),
+    path('Audit_empdaily_reportpdf/<int:audit_rep_id>', views.Audit_empdaily_reportpdf, name='Audit_empdaily_reportpdf'),
+        
+    path('Audit-Trainee-Report/<int:PDF_traineer_id>', views.audit_trainee_reportPDF, name='audit_trainee_reportPDF'),
 
- path('Projectmanager_action_taken>', views.Projectmanager_action_taken, name='Projectmanager_action_taken'),
- path('TL_action_taken>', views.TL_action_taken, name='TL_action_taken'),
- path('BRadmin_action_taken>', views.BRadmin_action_taken, name='BRadmin_action_taken'),
- path('DEVaction>', views.DEVaction, name='DEVaction'),
+    #     ========Accountant section=========
+    path('account_department_leave',views.account_department_leave,name='account_department_leave'),
+    path('account_leave_list/<int:id>',views.account_leave_list,name='account_leave_list'),
+    path('accounts_seen_leave/<int:id>',views.accounts_seen_leave,name='accounts_seen_leave'),
 
-#20-12-22
+    
+    re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
 
- path('pm_leavedesgn>', views.pm_leavedesgn, name='pm_leavedesgn'),  
- path('pm_emp_ajax>', views.pm_emp_ajax, name='pm_emp_ajax'),  
- path('tl_leavedesgn>', views.tl_leavedesgn, name='tl_leavedesgn'),  
- path('tl_emp_ajax>', views.tl_emp_ajax, name='tl_emp_ajax'),  
- 
-
- # Data Collector Section 17-03-23
-
-path('DatacollectorDashboard>', views.DatacollectorDashboard, name='DatacollectorDashboard'),
-path('Datacollectorlogout>', views.Datacollectorlogout, name='Datacollectorlogout'),
-path('Datacollector_changepwd>', views.Datacollector_changepwd, name='Datacollector_changepwd'), 
-path('Datacollector_accsetting>', views.Datacollector_accsetting, name='Datacollector_accsetting'),
-path('Datacollector_accsettingimagechange>/<int:id>', views.Datacollector_accsettingimagechange, name='Datacollector_accsettingimagechange'),    
-path('data_leave>', views.data_leave, name='data_leave'),
-path('data_leave_form>', views.data_leave_form, name='data_leave_form'),
-path('data_leave_apply>', views.data_leave_apply, name='data_leave_apply'),
-path('data_collectorleaverequiest>', views.data_collectorleaverequiest, name='data_collectorleaverequiest'),
-
-
-
-
-
-path('datacollector_leads>', views.datacollector_leads, name='datacollector_leads'),
-path('datacollector_registerleads>', views.datacollector_registerleads, name='datacollector_registerleads'),
-path('datacollector_Registered_search>', views.datacollector_Registered_search, name='datacollector_Registered_search'),
-path('datacollector_assingnedleads>', views.datacollector_assingnedleads, name='datacollector_assingnedleads'),
-path('datacollector_assingnedleads_search>', views.datacollector_assingnedleads_search, name='datacollector_assingnedleads_search'),
-path('datacollector_pendingleads>', views.datacollector_pendingleads, name='datacollector_pendingleads'),
-path('datacollector_completed_leads>', views.datacollector_completed_leads, name='datacollector_completed_leads'),
-path('datacollector_assignleads>', views.datacollector_assignleads, name='datacollector_assignleads'),
-
-path('datacollector_todyregisterleads>', views.datacollector_todyregisterleads, name='datacollector_todyregisterleads'),
-path('datacollector_todyassignedleads>', views.datacollector_todyassignedleads, name='datacollector_todyassignedleads'),
-path('datacollector_todypendingleads>', views.datacollector_todypendingleads, name='datacollector_todypendingleads'),
-path('datacollector_Register_exdata>/<int:pk>', views.datacollector_Register_exdata, name='datacollector_Register_exdata'), 
-
-path('data_assign_collector>', views.data_assign_collector, name='data_assign_collector'),
-path('data_collector_register_save>', views.data_collector_register_save, name='data_collector_register_save'),
-path('lead_fileupload>', views.lead_fileupload, name='lead_fileupload'),
-
-#data colector employeee section
-path('datacollector_employees>', views.datacollector_employees, name='datacollector_employees'),
-path('data_collector_datas>/<int:pk>', views.data_collector_datas, name='data_collector_datas'), 
-path('data_collector_datas_serach>/<int:pk>', views.data_collector_datas_serach, name='data_collector_datas_serach'), 
-path('datacollector_datas_check>/<int:pk>/<int:check>', views.datacollector_datas_check, name='datacollector_datas_check'), 
-
-
-#Data Collector Analiyis Section
-path('datacollector_analiyis>', views.datacollector_analiyis, name='datacollector_analiyis'),
-path('datacollector_lead_analiyisearch>', views.datacollector_lead_analiyisearch, name='datacollector_lead_analiyisearch'),
-
-
-
-#audit section 23-03-2023
-path('Audit_designation_list>', views.Audit_designation_list, name='Audit_designation_list'),
-path('Audit_designationemp_list>', views.Audit_designationemp_list, name='Audit_designationemp_list'),
-path('Audit_tester_works>/<int:pk>', views.Audit_tester_works, name='Audit_tester_works'),
-path('Audit_tester_works_view>/<int:pk>', views.Audit_tester_works_view, name='Audit_tester_works_view'),
-
-
-# Office Admin
-path('OFadmin_profiledash', views.OFadmin_profiledash, name='OFadmin_profiledash'),
-path('OFadmin_registration_view', views.of_admin_registrationview, name='of_admin_registrationview'),
-path('OFadmin_registration', views.ofadmin_registration, name='ofadmin_registration'),
-path('OFadmin_registration_delete/<int:id>', views.ofadmin_registrationdelete, name='ofadmin_registrationdelete'),
-path('OFadmin_new_registration', views.OFadmin_new_registration, name='OFadmin_new_registration'),
-path('OFadmin_registrationstatus/<int:id>', views.of_admin_registrationstatus, name='of_admin_registrationstatus'),
-path('OFadmin_resign', views.ofadmin_resign, name='ofadmin_resign'),
-path('OFadmin_man_registration-Update/<int:id>', views.OFadmin_man_registration_update, name='OFadmin_man_registration_update'),
-path('OFadmin_registration-Update-Save/<int:id>', views.OFadmin_registrationupdatesave, name='OFadmin_registrationupdatesave'),
-path('OFadmin_leavestatus', views.OFadmin_leavestatus, name='OFadmin_leavestatus'),
-path('OFadmin_applyleav', views.OFadmin_applyleav, name='OFadmin_applyleav'),
-path('OFadmin_leave_form', views.OFadmin_leave_form, name='OFadmin_leave_form'),
-path('OFadmin_leaverequiest', views.OFadmin_leaverequiest, name='OFadmin_leaverequiest'),
-path('OFadmin-Logout', views.OFadminlogout, name='OFadminlogout'),
-
-# Account Section
-
-path('OFadmin_accsetting', views.OFadmin_accsetting, name='OFadmin_accsetting'),
-path('OFadmin_accsettingimagechange/<int:id>', views.OFadmin_accsettingimagechange, name='OFadmin_accsettingimagechange'),
-path('OFadmin_changepwd', views.OFadmin_changepwd, name='OFadmin_changepwd'),
-
-# Request section 
-
-path('OFadmin-Request', views.of_admin_request, name='of_admin_request'),
-path('OFadmin-Request-Form-Submit', views.ofadmin_request_formSubmit, name='ofadmin_request_formSubmit'),
-path('OFadmin-Request-View', views.ofadmin_requestView, name='ofadmin_requestView'),
-path('OFadmin-Request-Status-Change/<int:req_id>', views.ofadmin_request_status_change, name='ofadmin_request_status_change'),
-
-
-# INTERNSHIP OFFICE ADMIN SECTION 
-
-path('OFadmin-Internship-View', views.OFadmin_internship_view, name='OFadmin_internship_view'),
-path('OFadmin-Internship-Lead-View', views.OFadmin_internship, name='OFadmin_internship'),
-path('OFadmin-Internship-request', views.OFadmin_internship_request, name='OFadmin_internship_request'),
-path('OFadmin-Internship-request-Form-submit', views.ofadmin_internship_request_formSubmit, name='ofadmin_internship_request_formSubmit'),
-path('OFadmin-Internship-request-List', views.ofadmin_internship_requestView, name='ofadmin_internship_requestView'),
-path('OFadmin-Internship-Date', views.OFadmin_internship_date, name='OFadmin_internship_date'),
-path('OFadmin_internship_dateview', views.OFadmin_internship_dateview, name='OFadmin_internship_dateview'),
-path('OFadmin-Internship-Pending', views.OFadmin_internship_pending, name='OFadmin_internship_pending'),
-path('OFadmin-Internship-Account-Approve', views.OFadmin_internship_acc_approved, name='OFadmin_internship_acc_approved'),
-path('OFadmin-Internship-Update/<int:id>', views.OFadmin_internship_update, name='OFadmin_internship_update'),
-path('OFadmin-Internship-te-Save/<int:id>', views.OFadmin_internshipupdatesave, name='OFadmin_internshipupdatesave'),
-path('OFadmin-Internship-Delete/<int:id>', views.OFadmin_interndelete, name='OFadmin_interndelete'),
-
-
-
-
-
-#Admin Module - Request section
-
-path('BRadmin-Request', views.BRadmin_request, name='BRadmin_request'),
-path('BRadmin_request_approve/<int:app_id>', views.BRadmin_request_approve, name='BRadmin_request_approve'),
-path('BRadmin_request_decline/<int:dec_id>', views.BRadmin_request_decline, name='BRadmin_request_decline'),
-
-
+  
+        
 
 
 

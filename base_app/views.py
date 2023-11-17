@@ -1,13 +1,11 @@
 from argparse import Action
-from asyncio.windows_events import NULL
+# from asyncio.windows_events import NULL
 from fileinput import filename
 from importlib.resources import contents
 from urllib import response
 import qrcode
 import random
 import csv
-import pandas as pd
-
 import os, json, math
 # import psycopg2
 from django.http import JsonResponse
@@ -52,7 +50,7 @@ def login(request):
         
         email  = request.POST['email']
         password = request.POST['password']
-        user =authenticate(username=email, password=password)
+        user = authenticate(username=email, password=password)
         if user is not None:
                 request.session['SAdm_id'] = user.id
                 Num1 = project.objects.count()
@@ -101,7 +99,7 @@ def login(request):
                 return render(request, 'trainersec.html', {'member': member})
     
         
-        des3 = designation.objects.get(designation='account')       
+        des3 = designation.objects.get(designation='accountant')       
         if user_registration.objects.filter(email=request.POST['email'], password=request.POST['password'], designation_id=des3.id,status="active").exists():
                 member = user_registration.objects.get(
                 email=request.POST['email'], password=request.POST['password'])
@@ -109,6 +107,11 @@ def login(request):
                 request.session['usernameacnt1'] = member.fullname
                 request.session['usernameacnt2'] = member.id
                 return render(request, 'accountsec.html', {'member': member})
+                # accountant=user_registration.objects.get(email=request.POST['email'], password=request.POST['password'])
+                # request.session['acc_id'] = accountant.id
+                # print(accountant)
+                
+                # return redirect('accountant_dashboard')
     
             
         manag = designation.objects.get(designation="manager")    
@@ -140,18 +143,6 @@ def login(request):
                 Trainer = designation.objects.get(designation='trainer')
                 trcount=user_registration.objects.filter(designation=Trainer).count()
                 return redirect('BRadmin_profiledash')
-
-        office_admin = designation.objects.get(designation="Office admin")   
-        if user_registration.objects.filter(email=request.POST['email'], password=request.POST['password'],designation=office_admin.id,status="active").exists():
-                
-                member=user_registration.objects.get(email=request.POST['email'], password=request.POST['password'])
-                request.session['ofadmin_id'] = member.designation_id
-                request.session['usernamets1'] = member.fullname
-                request.session['usernamehr2'] = member.branch_id
-                request.session['ofadmin_id'] = member.id 
-                of_Adm=user_registration.objects.filter(id= member.id)
-                Num = user_registration.objects.count()
-                return redirect('OFadmin_profiledash')
             
         design2 = designation.objects.get(designation="tester")   
         if user_registration.objects.filter(email=request.POST['email'], password=request.POST['password'],designation_id=design2.id,status="active").exists():
@@ -200,23 +191,7 @@ def login(request):
                 request.session['hr_id'] = member.id
                 
                 return redirect('HR_Dashboard')
-
-        design8 = designation.objects.get(designation="Data Collector")    
-        if user_registration.objects.filter(email=request.POST['email'], password=request.POST['password'],designation=design8.id,status="active").exists():
-                data_collector=user_registration.objects.get(email=request.POST['email'], password=request.POST['password'])
-                request.session['datacollector_id'] = data_collector.id
-                
-                return redirect('DatacollectorDashboard')
-            
         
-        design7 = designation.objects.get(designation="auditor")    
-        if user_registration.objects.filter(email=request.POST['email'], password=request.POST['password'],designation=design7.id,status="active").exists():
-                auduser=user_registration.objects.get(email=request.POST['email'], password=request.POST['password'])
-                request.session['aud_id'] = auduser.id
-                
-                return redirect('Auditdashboard')
-
-
         # design5 = designation.objects.get(designation="Digital manager")    
         # if user_registration.objects.filter(email=request.POST['email'], password=request.POST['password'],designation=design5.id,status="active").exists():
         #         dmmanager=user_registration.objects.get(email=request.POST['email'], password=request.POST['password'])
@@ -231,12 +206,26 @@ def login(request):
                 
         #         return redirect('dm_devdashboard')
 
-      
+        design7 = designation.objects.get(designation="auditor")    
+        if user_registration.objects.filter(email=request.POST['email'], password=request.POST['password'],designation=design7.id,status="active").exists():
+                auduser=user_registration.objects.get(email=request.POST['email'], password=request.POST['password'])
+                request.session['aud_id'] = auduser.id
+                
+                return redirect('Auditdashboard')
         
-       
+        # design8 = designation.objects.get(designation="accountant")    
+        # if user_registration.objects.filter(email=request.POST['email'], password=request.POST['password'],designation=design8.id,status="active").exists():
+        #         accountant=user_registration.objects.get(email=request.POST['email'], password=request.POST['password'])
+        #         request.session['acc_id'] = accountant.id
+        #         print(accountant)
+                
+        #         return redirect('accountant_dashboard')
+            
         else:
                 context = {'msg_error': 'Invalid data'}
                 return render(request, 'login.html', context)
+        
+        
 
        
     return render(request,'login.html')
@@ -500,23 +489,6 @@ def newbatchcreate(request):
     return redirect('new_batch')
 
     
-def batch_complete(request,pk):
-    if 'usernametm2' in request.session:
-        if request.session.has_key('usernametm'):
-            usernametm = request.session['usernametm']
-        if request.session.has_key('usernametm1'):
-            usernametm1 = request.session['usernametm1']
-        else:
-            return redirect('/')
-        mem = user_registration.objects.filter(designation_id=usernametm) .filter(fullname=usernametm1)
-        batc = Batch.objects.get(id=pk)
-        batc.bt_status=1
-        batc.save()
-        batc = Batch.objects.all()
-        return render(request, 'new_batch.html', {'mem': mem, 'batc': batc})
-    else:
-        return redirect('/')
-        
     
 
 def trainer_trainees_details(request, id):
@@ -668,7 +640,7 @@ def batchudate(request):
         return redirect('new_batch')
     else:
         pass
-
+    
 def traineupdate(request):
     if request.session.has_key('usernametm'):
         usernametm = request.session['usernametm']
@@ -779,7 +751,6 @@ def Trainers_Attendancetable(request):
         return render(request, 'Trainers_Attendancetable.html',{'mem':mem,'vars':attend})
     else:
         return redirect('/')
-    
 def Trainee(request):
     if 'usernametm2' in request.session:
         if request.session.has_key('usernametm'):
@@ -1355,6 +1326,7 @@ def Trainer_Current_Assigned(request, id):
 
     else:
         return redirect('/')
+        
 def Trainer_Currenttrainee(request, id):
     if 'usernametm2' in request.session:
         if request.session.has_key('usernametm'):
@@ -1691,24 +1663,7 @@ def traineedetails(request,id):
     else:
         return redirect('/')
 
-
-def taineestatuschange(request,pk):
-    if request.session.has_key('usernametm'):
-        usernametm = request.session['usernametm']
-        if request.session.has_key('usernametm1'):
-            usernametm1 = request.session['usernametm1']
-        else:
-            return redirect('/')
         
-        if request.method == 'POST':
-    
-            k=user_registration.objects.get(id=pk)
-            k.trainee_status=request.POST['status_change']
-            k.save()
-            return redirect('Trainee')
-    
-    else:
-        return redirect('/')
         
         
         
@@ -3418,7 +3373,7 @@ def BRadmin_designations(request):
         br_id = department.objects.get(id=dept_id)
         
         
-        Desig = designation.objects.filter(~Q(designation="admin"),~Q(designation="manager"),~Q(designation="project manager"),~Q(designation="tester"),~Q(designation="trainingmanager"),~Q(designation="trainer"),~Q(designation="trainee"),~Q(designation="account"),~Q(designation="hr")).filter(branch_id=br_id.branch_id)
+        Desig = designation.objects.filter(~Q(designation="admin"),~Q(designation="manager"),~Q(designation="project manager"),~Q(designation="tester"),~Q(designation="trainingmanager"),~Q(designation="trainer"),~Q(designation="trainee"),~Q(designation="accountant"),~Q(designation="hr")).filter(branch_id=br_id.branch_id)
         return render(request,'BRadmin_designations.html',{'Adm': Adm,'Desig': Desig, })
     else:
         return redirect('/')
@@ -3697,7 +3652,6 @@ def BRadmin_index(request):
     else:
         return redirect('/')
     
-    
 def BRadmin_profiledash(request):
     if 'Adm_id' in request.session:
         if request.session.has_key('Adm_id'):
@@ -3707,7 +3661,6 @@ def BRadmin_profiledash(request):
         Adm = user_registration.objects.filter(id=Adm_id)
         Num = user_registration.objects.filter(status="active").count()
         Num1 = project.objects.count()
-        lead_count = Leads_Register.objects.count()
         Trainer = designation.objects.get(designation='Trainer')
         trcount = user_registration.objects.filter(designation=Trainer).count()
         Man1 = designation.objects.get(designation='Manager')
@@ -3724,12 +3677,12 @@ def BRadmin_profiledash(request):
         l=leave.objects.filter(to_date__gte=date.today())
        
         count=user_registration.objects.filter(~Q(id__in=l.values_list('user_id', flat=True)),Q(designation_id=tlde.id) | Q(designation_id=d.id),status="active",work_status='0').count()
-        requests = Certificate_approve.objects.filter(cf_status=0)
+       
         for i in queryset:
             labels = [i.workperformance, i.attitude, i.creativity]
             data = [i.workperformance, i.attitude, i.creativity]
 
-        return render(request, 'BRadmin_profiledash.html', {'requests':requests,'labels': labels, 'data': data, 'Num1': Num1, 'Man1': Man2, 'Adm': Adm, 'num': Num, 'trcount': trcount, 'le': le,'count':count,'lead_count':lead_count})
+        return render(request, 'BRadmin_profiledash.html', {'labels': labels, 'data': data, 'Num1': Num1, 'Man1': Man2, 'Adm': Adm, 'num': Num, 'trcount': trcount, 'le': le,'count':count})
     else:
         return redirect('/')
 
@@ -3927,7 +3880,7 @@ def BRadmin_trainerstable(request,did):
         Adm = user_registration.objects.filter(id=Adm_id)
         Trainer = designation.objects.get(designation='Trainer')
         # Trainer = designation.objects.get(id=id)
-        trainers_data=user_registration.objects.filter(designation=Trainer).filter(department=did)
+        trainers_data=user_registration.objects.filter(designation=Trainer).filter(status="active").filter(department=did)
         topics=topic.objects.all()
         return render(request,'BRadmin_trainerstable.html',{'Adm':Adm,'trainers_data':trainers_data,'topics':topics,'Dept':Dept,'deptid':deptid})
     else:
@@ -4636,83 +4589,7 @@ def BRadmin_dept(request):
         return render(request,'BRadmin_dept.html',{'proj_det':project_details,'department':depart,'Adm':Adm})
     else:
         return redirect('/')
-
-
-def BRadmin_leads(request):
-    if 'Adm_id' in request.session:
-        if request.session.has_key('Adm_id'):
-            Adm_id = request.session['Adm_id']
-        else:
-            return redirect('/')
-        Adm = user_registration.objects.filter(id=Adm_id)
-        project_details = project.objects.all()
-        depart =department.objects.all()
-        return render(request,'BRadmin_leads.html',{'proj_det':project_details,'department':depart,'Adm':Adm})
-    else:
-        return redirect('/')
-
-
-def BRadmin_currentleads(request):
-    if 'Adm_id' in request.session:
-        if request.session.has_key('Adm_id'):
-            Adm_id = request.session['Adm_id']
-        else:
-            return redirect('/')
-        Adm = user_registration.objects.filter(id=Adm_id)
-        leads=Leads_Register.objects.filter(Q(r_type_status='') | Q(r_type_status=1),r_status=3)
-        return render(request,'BRadmin_currentleads.html',{'leads':leads,'Adm':Adm})
-    else:
-        return redirect('/')
-
-def BRadmin_watingleads(request):
-    if 'Adm_id' in request.session:
-        if request.session.has_key('Adm_id'):
-            Adm_id = request.session['Adm_id']
-        else:
-            return redirect('/')
-        Adm = user_registration.objects.filter(id=Adm_id)
-        leads=Leads_Register.objects.filter(r_type_status=2)
-        return render(request,'BRadmin_watingleads.html',{'leads':leads,'Adm':Adm})
-    else:
-        return redirect('/')
-
-def BRadmin_confirmedleads(request):
-    if 'Adm_id' in request.session:
-        if request.session.has_key('Adm_id'):
-            Adm_id = request.session['Adm_id']
-        else:
-            return redirect('/')
-        Adm = user_registration.objects.filter(id=Adm_id)
-        leads=Leads_Register.objects.filter(r_status=1)
-        return render(request,'BRadmin_confirmedleads.html',{'leads':leads,'Adm':Adm})
-    else:
-        return redirect('/')
     
-
-
-def BRadmin_internshipleads(request):
-    if 'Adm_id' in request.session:
-        if request.session.has_key('Adm_id'):
-            Adm_id = request.session['Adm_id']
-        else:
-            return redirect('/')
-        Adm = user_registration.objects.filter(id=Adm_id)
-        leads=Leads_Register.objects.filter(r_type='Internship')
-        return render(request,'BRadmin_internship_jobleads.html',{'leads':leads,'Adm':Adm})
-    else:
-        return redirect('/')
-    
-def BRadmin_jobleads(request):
-    if 'Adm_id' in request.session:
-        if request.session.has_key('Adm_id'):
-            Adm_id = request.session['Adm_id']
-        else:
-            return redirect('/')
-        Adm = user_registration.objects.filter(id=Adm_id)
-        leads=Leads_Register.objects.filter(r_type='job')
-        return render(request,'BRadmin_internship_jobleads.html',{'leads':leads,'Adm':Adm})
-    else:
-        return redirect('/')
 # def BRadmin_profiledash(request):
 #     Num= project.objects.count()
 #     project_details = project.objects.all()
@@ -5614,7 +5491,7 @@ def BRadmin_seradmintraineedesi1(request):
             return redirect('/')
         Adm = user_registration.objects.filter(id=Adm_id)
         dept_id = request.GET.get('dept_id')
-        Desig = designation.objects.filter(~Q(designation='admin'), ~Q(designation='manager'), ~Q(designation='account'))
+        Desig = designation.objects.filter(~Q(designation='admin'), ~Q(designation='manager'), ~Q(designation='accountant'))
         
         return render(request, 'BRadmin_dropdown.html', {'Desig': Desig,'Adm':Adm})
     else:
@@ -5623,7 +5500,7 @@ def BRadmin_seradmintraineedesi1(request):
 def BRadmin_seradmindesig(request):
 	
 	dept_id = request.GET.get('dept_id')
-	Desig = designation.objects.filter(~Q(designation="admin"), ~Q(designation="manager"), ~Q(designation="account"))
+	Desig = designation.objects.filter(~Q(designation="admin"), ~Q(designation="manager"), ~Q(designation="accountant"))
 	
 	return render(request, 'BRadmin_giveprojectdropdown.html', {'Desig': Desig})
 	
@@ -5747,7 +5624,7 @@ def MAN_seradmintraineedesi1(request):
             return redirect('/')
         mem = user_registration.objects.filter(id=m_id)
         dept_id = request.GET.get('dept_id')
-        Desig = designation.objects.filter(~Q(designation="admin"), ~Q(designation="manager"), ~Q(designation="account"))
+        Desig = designation.objects.filter(~Q(designation="admin"), ~Q(designation="manager"), ~Q(designation="accountant"))
         
         return render(request, 'MAN_createprojectdropdown.html', {'Desig': Desig,'mem':mem})
     else:
@@ -5762,7 +5639,7 @@ def MAN_seradmindesig(request):
         mem = user_registration.objects.filter(id=m_id)
         
         dept_id = request.GET.get('dept_id')
-        Desig = designation.objects.filter(~Q(designation='admin'),~Q(designation='manager'),~Q(designation='account'))
+        Desig = designation.objects.filter(~Q(designation='admin'),~Q(designation='manager'),~Q(designation='accountant'))
         pr
         return render(request, 'MAN_giveprojectdropdown.html', {'Desig': Desig,'mem':mem})
     else:
@@ -6028,7 +5905,7 @@ def man_registration_form(request):
             email_id=x.email
             x.save()
             y1 = user_registration.objects.get(id=a.id)
-            qr = qrcode.make("http://altoscore.in/offerletter/" + str(y1.id))
+            qr = qrcode.make("https://altoscoreweb.com/offerletter/" + str(y1.id))
             qr.save(settings.MEDIA_ROOT + "/images"+"//" +"offer"+str(y1.id) + ".png")
             with open(settings.MEDIA_ROOT + "/images"+"//"+"offer"+ str(y1.id) +".png","rb") as reopen:
                     djangofile = File(reopen)
@@ -6036,14 +5913,14 @@ def man_registration_form(request):
                     y1.save()
     
             y2 = user_registration.objects.get(id=a.id)
-            qr1 = qrcode.make("http://altoscore.in/relieveletter/" + str(y2.id))
+            qr1 = qrcode.make("https://altoscoreweb.com/relieveletter/" + str(y2.id))
             qr1.save(settings.MEDIA_ROOT + "/images"+"//"+"re" +str(y2.id) + ".png")
             with open(settings.MEDIA_ROOT + "/images"+"//"+"re" + str(y2.id) + ".png", "rb") as reopen:
                     djangofile = File(reopen)
                     y2.relieveqr = djangofile
                     y2.save()
             y3 = user_registration.objects.get(id=a.id)
-            qr2 = qrcode.make("http://altoscore.in/experienceletter/" + str(y3.id))
+            qr2 = qrcode.make("https://altoscoreweb.com/experienceletter/" + str(y3.id))
             qr2.save(settings.MEDIA_ROOT + "/images"+"//"+"exp" +str(y3.id) + ".png")
             with open(settings.MEDIA_ROOT + "/images"+"//"+"exp" + str(y3.id) + ".png", "rb") as reopen:
                     djangofile = File(reopen)
@@ -6089,7 +5966,7 @@ def man_registration_form(request):
             
             recipient_list = [email_id, ]
             send_mail(subject,message , email_from, recipient_list, fail_silently=True)
-            msg_success = "Registration successfully Check Your Registered Mail"
+            msg_success = "Registration successfull Please check your registered Email for login credentials"
             return render(request, 'man_registration_form.html',{'msg_success': msg_success,'branch':branch})
         
     return render(request, 'man_registration_form.html',{'branch':branch,'depart':depart})
@@ -6114,15 +5991,12 @@ def render_pdfof_view(request,id):
     con = conditions.objects.get(id=1)
     mem = user_registration.objects.get(id=id)
     br_admin = branch_registration.objects.get(id=mem.branch_id)
-    if request.method == 'POST':
-        salr= request.POST['sal']
     template_path = 'pdfof.html'
     context = {'mem': mem,
     'con':con,
     'media_url':settings.MEDIA_URL,
     'date':date,
-    'br_admin':br_admin,
-    'salr':salr,
+    'br_admin':br_admin
     }
     # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')
@@ -6412,11 +6286,10 @@ def projectmanager_assignproject(request):
         desi_id = user_registration.objects.get(id=prid)
         d = designation.objects.get(designation="team leader")
         t = designation.objects.get(designation="tester")
+        drt = department.objects.all()
         
-        
-        tes = user_registration.objects.filter(designation_id= t.id)#department_id = desi_id.department_id, 
+        tes = user_registration.objects.filter(designation_id= t.id)#department_id = desi_id.department_id,
         spa = user_registration.objects.filter(department_id = desi_id.department_id, designation_id= d.id)
-       
         
         pvar = project.objects.filter(Q(status="accepted")|Q(status="assigned"))
         modules = project_module_assign.objects.all()
@@ -6445,7 +6318,7 @@ def projectmanager_assignproject(request):
             var.developer_id= request.POST['pname']
             var.teamleader_id = request.POST['pname']            
             var.tester_id= request.POST['tname']
-
+            var.departments_id = request.POST['prodepart']
             var.save()
             new = project.objects.get(id=var.project_id)
             new.status = "assigned"
@@ -6480,10 +6353,22 @@ def projectmanager_assignproject(request):
             #       [recepient], fail_silently=False)
             msg_success = "Project assigned successfully"
             
-            return render(request, 'projectmanager_assignproject.html',{'pro':pro,'spa':spa,'pvar':pvar,'tes':tes, 'msg_success':msg_success,'modules':modules})
-        return render(request, 'projectmanager_assignproject.html', {'pro':pro,'spa':spa,'pvar':pvar,'tes':tes,'modules':modules})
+            return render(request, 'projectmanager_assignproject.html',{'drt':drt,'pro':pro,'spa':spa,'pvar':pvar,'tes':tes, 'msg_success':msg_success,'modules':modules})
+        return render(request, 'projectmanager_assignproject.html', {'drt':drt,'pro':pro,'spa':spa,'pvar':pvar,'tes':tes,'modules':modules})
     else:
         return redirect('/')
+
+
+def mandesig_promanager(request):   
+    dept_id = request.GET.get('dept_id')
+    desig_id = request.GET.get('desig_id')
+    dept=department.objects.filter(id=dept_id)
+    desi=designation.objects.filter(id=desig_id)
+    desi12=designation.objects.get(designation="team leader")
+    user=user_registration.objects.filter(designation_id=desi12.id, department_id=dept_id, status="active")
+    
+    
+    return render(request, 'MAN_employee.html',{'user':user,'dept':dept,'desi':desi})
 
 
 @csrf_exempt
@@ -6515,7 +6400,6 @@ def projectmanager_projectstatus(request,id):
         des = designation.objects.get(designation="team leader")
         dev = designation.objects.get(designation="developer")
         var = project_taskassign.objects.filter(project_id=id).order_by('-id')
-
         data = test_status.objects.filter(project_id=id).order_by('-id')
         data1 = tester_status.objects.filter(project_id=id).order_by('-id')
         newdata = project_taskassign.objects.filter(project_id=id,subtask__isnull = False).order_by('-id')
@@ -6544,17 +6428,13 @@ def projectmanager_createproject(request):
             
         mem = user_registration.objects.filter(id=prid)  
         br_id = user_registration.objects.get(id=prid)  
-        dept = department.objects.all()
         if request.method =='POST':
             mem = user_registration.objects.filter(id=prid)
             mem2 = user_registration.objects.get(id=prid)
             var = project()
             doc = PM_ProjectDocument()
             var.projectmanager_id = prid
-            var.department_id = mem2.department_id 
-            # dept_id=department.objects.get(id=request.POST.get('dpt_name')) 
-            # var.department_id = dept_id.id
-           
+            var.department_id = mem2.department_id
             var.project=request.POST.get('pname')
             var.startdate=request.POST.get('sdate')
             var.enddate=request.POST.get('edate')
@@ -6573,39 +6453,9 @@ def projectmanager_createproject(request):
 
             msg_success = "Project created successfully"
             return render(request, 'projectmanager_createproject.html',{'msg_success':msg_success})
-        return render(request, 'projectmanager_createproject.html',{'pro':mem,'dept':dept})
+        return render(request, 'projectmanager_createproject.html',{'pro':mem})
     else:
         return redirect('/')
-
-def pmstart_new_document(request):
-     if 'prid' in request.session:
-        if request.session.has_key('prid'):
-            prid = request.session['prid']
-      
-        mem = user_registration.objects.filter(id=prid) 
-        if request.method == 'POST':
-            docid=request.POST['docid']
-            var = project.objects.get(id=docid)
-            doc = PM_ProjectDocument() 
-            doc.doc_project_id= var
-            doc.doc_project_name =var.project
-            doc.doc_project_startdate =  var.startdate
-            doc.doc_project_enddate = var.enddate
-            doc.save()
-            return  redirect('projectManager_project_document')
-
-def pm_doc_upload(request):
-    if 'prid' in request.session:
-        if request.session.has_key('prid'):
-            prid = request.session['prid']
-            if request.method == 'POST':
-                
-                if request.FILES.get('upload_file'):
-                    docid=request.POST['docid']
-                    doc = PM_ProjectDocument.objects.get(id=docid) 
-                    doc.doc_project_ui=request.FILES.get('upload_file')
-                    doc.save()
-                    return  redirect('projectManager_project_document')
 
 def uiupdate(request):
     if 'prid' in request.session:
@@ -7165,6 +7015,36 @@ def pm_doc_des_pdf(request,desedoc_pdf):
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
+
+def pmstart_new_document(request):
+     if 'prid' in request.session:
+        if request.session.has_key('prid'):
+            prid = request.session['prid']
+      
+        mem = user_registration.objects.filter(id=prid) 
+        if request.method == 'POST':
+            docid=request.POST['docid']
+            var = project.objects.get(id=docid)
+            doc = PM_ProjectDocument() 
+            doc.doc_project_id= var
+            doc.doc_project_name =var.project
+            doc.doc_project_startdate =  var.startdate
+            doc.doc_project_enddate = var.enddate
+            doc.save()
+            return  redirect('projectManager_project_document')
+
+def pm_doc_upload(request):
+    if 'prid' in request.session:
+        if request.session.has_key('prid'):
+            prid = request.session['prid']
+            if request.method == 'POST':
+                
+                if request.FILES.get('upload_file'):
+                    docid=request.POST['docid']
+                    doc = PM_ProjectDocument.objects.get(id=docid) 
+                    doc.doc_project_ui=request.FILES.get('upload_file')
+                    doc.save()
+                    return  redirect('projectManager_project_document')
 
 # document correction pdf  
 
@@ -8187,9 +8067,9 @@ def TLdashboard(request):
             this_event_lst_cnt = len(this_evntlst)
             
 
-            
-            this_leave_lst= []
 
+            
+            this_leave_lst = []
             def this_remove_days(from_day, end_day):
                 this_leaves = leave.objects.filter(from_date__range=(from_day,end_day),to_date__range=(from_day,end_day), user_id = tlid).values('from_date','to_date')
                 
@@ -8492,7 +8372,6 @@ def tlprojecttasks(request,id):
                     task.json_testerscreenshot = lst_file
             task.save()
             proj=project.objects.get(id=id)
-           
             msg_success = "Task added successfully"
             return render(request, 'TLprojecttasks.html', {'msg_success':msg_success,'proj':proj})
         else:
@@ -9237,18 +9116,10 @@ def TSproject_status_confirm(request,ts_prj_task_verify):
             verify_task=TSproject_Task_verify(ts_project_task=prj_task,ts_reson_dely=delay_reson,
                                                 ts_delay=delys,ts_tester=prj_task.tester,ts_task_status=task_verify,ts_task_sub_date=prj_task.submitted_date)
             verify_task.save()
-
-            var= project_taskassign.objects.get(id=verify_task.ts_project_task.id)
-            var.tester_delay = int(var.tester_delay) + int(verify_task.ts_delay)
-            var.save()
         else:
             verify_task=TSproject_Task_verify(ts_project_task=prj_task,ts_reson_dely=delay_reson,
                                                 ts_delay=0,ts_tester=prj_task.tester,ts_task_status=task_verify,ts_task_sub_date=prj_task.submitted_date)
             verify_task.save()
-            var= project_taskassign.objects.get(id=verify_task.ts_project_task.id)
-            var.tester_delay = int(var.tester_delay) + int(verify_task.ts_delay)
-            var.save()
-
         pts=project_taskassign.objects.get(id=ts_prj_task_verify)
         prj_id=prj_task.project.id
         return redirect('TSprojectdetails', prj_id)
@@ -9365,6 +9236,17 @@ def TSsucess(request):
 #-----------------------------------------------------------------------------------------------------------------------------------------
 
 #developer module
+
+# acations taken to developer 
+def DEVaction(request):
+    if request.session.has_key('devid'):
+        devid = request.session['devid']
+    else:
+       return redirect('/')
+    dev = user_registration.objects.filter(id=devid)
+    devp = user_registration.objects.get(id=devid)
+    action_take=wrdata.objects.filter(wrn_develp=devp)
+    return render(request, 'DEVaction.html', {'dev': dev, 'devp': devp,  'action_take':action_take})
 
 def devindex(request):
     if request.session.has_key('devid'):
@@ -9724,7 +9606,7 @@ def devdashboard(request):
     if wreq :
          work_req=WorkRequest.objects.get(wrk_develp_id=devid,wrkreq_date=date.today())
     else:
-        work_req=NULL
+        work_req=None
 
     return render(request, 'devdashboard.html', {'labels':labels,'data':data,'dev': dev,  'previous_sal_main':previous_sal_main, 'this_month_sal_main':this_month_sal_main, 'last_day_of_prev_month':last_day_of_prev_month,
      'start_day_of_prev_month':start_day_of_prev_month,'work_check':work_check,'work_req':work_req})
@@ -9970,8 +9852,8 @@ def DEVtable(request, id):
     proj=project.objects.get(id=id)
     testerstatus = tester_status.objects.filter(project_id=id)
     time = datetime.now()
-   
-    return render(request, 'DEVtable.html', {'dev': dev, 'devp': devp, 'time': time, 'teststatus': teststatus,'testerstatus': testerstatus,'proj':proj})
+    action_take=wrdata.objects.all()
+    return render(request, 'DEVtable.html', {'dev': dev, 'devp': devp, 'time': time, 'teststatus': teststatus, 'action_take':action_take,'testerstatus': testerstatus,'proj':proj})
 
 
 #******************Developer Project Document section **********************
@@ -10622,7 +10504,7 @@ def man_registration_update(request, id):
         try:
             qem = qualification.objects.get(user_id=id)
         except qualification.DoesNotExist:
-            qem= None
+            qem = None
         des = designation.objects.filter(~Q(designation='admin'))
         desig = designation.objects.all().exclude(designation = 'team leader').exclude(designation ='manager').exclude(designation ='trainee').exclude(designation ='project manager').exclude(designation ='tester').exclude(designation ='trainingmanager').exclude(designation ='account').exclude(designation ='trainer').exclude(designation ='developer')
 
@@ -10633,6 +10515,7 @@ def man_registration_update(request, id):
         return render(request, 'man_registration_update.html', {'con': con, 'mem4': mem4, 'qem': qem, 'xem': xem, 'Adm': Adm, 'des': des, 'br_name': br_name, 'desig':desig})
     else:
         return redirect('/')
+
 
 def man_registration(request):
     if request.session.has_key('m_id'):
@@ -10737,6 +10620,7 @@ def registrationupdatesave(request, id):
 
     d = conditions.objects.get(id=1)
     if request.method == 'POST':
+        a.performance = request.POST['perfo']
         a.fullname = request.POST['name']
         a.fathername = request.POST['fathersname']
         a.mothername = request.POST['mothersname']
@@ -10803,6 +10687,7 @@ def registrationupdatesave(request, id):
         d.condition6 = request.POST.get("condition6")
         d.save()
         return redirect('BRadmin_registration')
+
         
 def registrationdelete(request,id):
     man = user_registration.objects.get(id=id)
@@ -10932,7 +10817,7 @@ def accounts_leavehistory(request):
 #             usernameacnt2 = request.session['usernameacnt2']
 #         z = user_registration.objects.filter(id=usernameacnt2)
 #         var = department.objects.get(id=id)
-#         de = designation.objects.filter(~Q(designation='account'))
+#         de = designation.objects.filter(~Q(designation='accountant'))
 #         return render(request,'accounts_leavehistory_department.html',{'z' : z,'de':de,'var':var})
 #     else:
 #         return redirect('/')
@@ -10943,7 +10828,7 @@ def accounts_leavehistory_department(request, id):
             usernameacnt2 = request.session['usernameacnt2']
         z = user_registration.objects.filter(id=usernameacnt2)
         var = department.objects.get(id=id)
-        de = designation.objects.filter(~Q(designation='account'))
+        de = designation.objects.filter(~Q(designation='accountant'))
         return render(request, 'accounts_leavehistory_department.html', {'z': z, 'de': de, 'var': var})
     else:
         return redirect('/')
@@ -11622,7 +11507,7 @@ def reset_password(request):
             password = random.SystemRandom().randint(100000, 999999)
 
             _user.password = password
-            subject = 'iNFOX Technologies your authentication data updated'
+            subject = 'Altos Technologies your authentication data updated'
             message = 'Password Reset Successfully\n\nYour login details are below\n\nUsername : ' + str(email_id) + '\n\nPassword : ' + str(password) + \
                 '\n\nYou can login this details\n\nNote: This is a system generated email, do not reply to this email id'
             email_from = settings.EMAIL_HOST_USER
@@ -13274,7 +13159,6 @@ def BRadmin_tester_project_list(request,BRadmin_prj_list):
             return redirect('/')
         Adm = user_registration.objects.filter(id=Adm_id)
         proj_list=project_taskassign.objects.filter(tester_id=BRadmin_prj_list).order_by('-submitted_date')
-
         verify_num=project_taskassign.objects.filter(tester_id=BRadmin_prj_list, status='submitted').count()
         pending_verify_num=project_taskassign.objects.filter(tester_id=BRadmin_prj_list, status='Verification').count()
         correction_num=project_taskassign.objects.filter(tester_id=BRadmin_prj_list, status='correction').count()
@@ -13846,7 +13730,7 @@ def projectmanager_designation(request):
         dept_id = request.GET.get('dept_id')
         
         br_id = department.objects.get(id=dept_id)
-        Desig = designation.objects.filter(~Q(designation="admin"),~Q(designation="manager"),~Q(designation="project manager"),~Q(designation="trainingmanager"),~Q(designation="trainer"),~Q(designation="trainee"),~Q(designation="account"), ~Q(designation="hr")).filter(branch_id=br_id.branch_id)
+        Desig = designation.objects.filter(~Q(designation="admin"),~Q(designation="manager"),~Q(designation="project manager"),~Q(designation="trainingmanager"),~Q(designation="trainer"),~Q(designation="trainee"),~Q(designation="accountant"), ~Q(designation="hr")).filter(branch_id=br_id.branch_id)
         return render(request,'projectmanager_designation.html',{'pro':pro,'Desig': Desig, })
     else:
         return redirect('/')
@@ -15212,9 +15096,10 @@ def accounts_designation(request):
         z = user_registration.objects.filter(id=usernameacnt2)
 
         dept_id = request.GET.get('dept_id')
-        Desig = designation.objects.filter(~Q(designation="admin"),~Q(designation="manager"),~Q(designation="project manager"),~Q(designation="tester"),~Q(designation="trainingmanager"),~Q(designation="trainer"),~Q(designation="trainee"),~Q(designation="account"),~Q(designation="hr"))
-       
-        return render(request,'accounts_designation.html',{'z':z,'Desig': Desig, })
+        br_id = department.objects.get(id=dept_id)
+        Desig = designation.objects.filter(~Q(designation="admin"),~Q(designation="manager"),~Q(designation="tester"),~Q(designation="accountant"),~Q(designation="caller"),~Q(designation="hr"),~Q(designation="auditor"),~Q(designation="head"),~Q(designation="Executive")).filter(branch_id=br_id.branch_id)
+        # Desig = designation.objects.filter(branch_id=br_id.branch_id)
+        return render(request,'accounts_designation.html',{'z':z,'Desig': Desig,'dept_id':dept_id })
     else:
         return redirect('/')
 
@@ -15226,11 +15111,11 @@ def accounts_emp_ajax(request):
         z = user_registration.objects.filter(id=usernameacnt2)
 
         dept_id = request.GET.get('dept_id')
-        courseId = request.GET.get('courseId')
+        
         desigId = request.GET.get('desigId')
-        Desig = user_registration.objects.filter(course=courseId, department=dept_id, designation=desigId, status="active")
+        Desig = user_registration.objects.filter(department=dept_id, designation=desigId, status="active")
 
-        return render(request,'accounts_emp_ajax.html',{'z':z,'Desig': Desig,})
+        return render(request,'accounts_emp_ajax.html',{'z':z,'Desig': Desig,'dept_id':dept_id})
     else:
         return redirect('/')
 
@@ -16007,261 +15892,12 @@ def HR_imagesettings(request):
     else:
         return redirect('/')
 
-
-    
-#============== 24/02/2023  New Upadation =============
-
-
-def HR_training_leads(request):
-
-    if 'hr_id' in request.session:
-        if request.session.has_key('hr_id'):
-           hr_id = request.session['hr_id']
-        mem = user_registration.objects.filter(id=hr_id)
-        
-        return render(request,'hr_module/HR_training_leads.html', {'mem': mem})
-    else:
-        return redirect('/')
-    
-    
-def HR_upcoming_leads(request):
-
-    if 'hr_id' in request.session:
-        if request.session.has_key('hr_id'):
-           hr_id = request.session['hr_id']
-        mem = user_registration.objects.filter(id=hr_id)
-        leads=Leads_Register.objects.filter(r_status=0,r_assing_id=hr_id)
-        return render(request,'hr_module/HR_upcoming_leads.html', {'mem': mem,'leads':leads})
-    else:
-        return redirect('/')
-
-
-def HR_current_leads(request):
-
-    if 'hr_id' in request.session:
-        if request.session.has_key('hr_id'):
-           hr_id = request.session['hr_id']
-        mem = user_registration.objects.filter(id=hr_id)
-        leads=Leads_Register.objects.filter(Q(r_type_status='') | Q(r_type_status=1),r_status=3,r_refference=hr_id)
-        return render(request,'hr_module/HR_current_leads.html', {'mem': mem,'leads':leads})
-    else:
-        return redirect('/')
-    
-def HR_Waiting_leads(request):
-
-    if 'hr_id' in request.session:
-        if request.session.has_key('hr_id'):
-           hr_id = request.session['hr_id']
-        mem = user_registration.objects.filter(id=hr_id)
-        leads=Leads_Register.objects.filter(r_type_status=2,r_refference=hr_id)
-        cur_date=date.today()
-       
-        return render(request,'hr_module/HR_wating_leads.html', {'mem': mem,'leads':leads,'cur_date':cur_date})
-    else:
-        return redirect('/')
-
-def HR_leads_expfre(request,pk):
-
-    if 'hr_id' in request.session:
-        if request.session.has_key('hr_id'):
-           hr_id = request.session['hr_id']
-        mem = user_registration.objects.filter(id=hr_id)
-        if pk == 1:
-            leads=Leads_Register.objects.filter(r_type_status=2,r_refference=hr_id, r_fre_exp='Fresher')
-            print(leads)
-        else:
-            leads=Leads_Register.objects.filter(r_type_status=2,r_refference=hr_id, r_fre_exp='Experienced')
-            print(leads)
-
-        cur_date=date.today()
-       
-        return render(request,'hr_module/HR_wating_leads.html', {'mem': mem,'leads':leads,'cur_date':cur_date})
-    else:
-        return redirect('/')
-    
-    
-def HR_Joined(request):
-
-    if 'hr_id' in request.session:
-        if request.session.has_key('hr_id'):
-           hr_id = request.session['hr_id']
-        mem = user_registration.objects.filter(id=hr_id)
-        leads=Leads_Register.objects.filter(r_status=1,r_refference=hr_id)
-        return render(request,'hr_module/HR_joined.html', {'mem': mem,'leads':leads})
-    else:
-        return redirect('/')
-    
-        
-def HR_add_leads(request):
-
-    if 'hr_id' in request.session:
-        if request.session.has_key('hr_id'):
-           hr_id = request.session['hr_id']
-        mem = user_registration.objects.filter(id=hr_id)
-       
-        return render(request,'hr_module/HR_add_lead.html', {'mem': mem})
-    else:
-        return redirect('/')
-    
-def HR_register_lead(request):
-    if 'hr_id' in request.session:
-        if request.session.has_key('hr_id'):
-           hr_id = request.session['hr_id']
-        mem = user_registration.objects.filter(id=hr_id)
-      
-        
-        if request.method == 'POST':
-
-            email_check = Leads_Register.objects.filter(r_email__iexact=request.POST['remail']).exists()
-            phno_check = Leads_Register.objects.filter(r_phno__iexact=request.POST['rphno']).exists()
-            
-            if email_check or phno_check :
-                msg_success="Lead Registration Not Successfull, Email Id Or Phone Number Already Exists"
-                leads=Leads_Register.objects.filter(r_status=0,r_refference=hr_id)
-                return render(request,'hr_module/HR_add_lead.html', {'mem': mem,'msg_success':msg_success,'leads':leads})
-            
-            else:
-                reg = Leads_Register()
-                reg.r_fullname = request.POST['rname']
-                reg.r_email = request.POST['remail']
-                reg.r_phno = request.POST['rphno']
-                reg.r_place = request.POST['rplace']
-                reg.r_qulific = request.POST['rquli']
-                reg.r_pass_out_year = request.POST['ryear']
-                reg.r_fre_exp = request.POST['rfr_exp']
-                reg.r_lead_source = request.POST['l_source']
-                reg.r_refference = user_registration.objects.get(id=request.POST['rreffer'])
-                reg.r_dese = request.POST['rdesc']
-                msg_success="Lead Registration Successfull"
-                reg.save()
-                leads=Leads_Register.objects.filter(r_status=0,r_refference=hr_id)
-
-        return render(request,'hr_module/HR_add_lead.html', {'mem': mem,'msg_success':msg_success,'leads':leads})
-    
-    else:
-        return redirect('/')
-    
-
-def check_email(request):
-    email = request.GET.get('email', None)
-    data = {
-        'is_taken': Leads_Register.objects.filter(r_email__iexact=email).exists()
-    }
-   
-    return JsonResponse(data)
-
-def check_phone(request):
-    phno = request.GET.get('phno', None)
-    data = {
-        'is_taken': Leads_Register.objects.filter(r_phno__iexact=phno).exists()
-    }
-   
-    return JsonResponse(data)
-
-def HR_lead_accept(request,pk):
-
-    if 'hr_id' in request.session:
-        if request.session.has_key('hr_id'):
-           hr_id = request.session['hr_id']
-        mem = user_registration.objects.filter(id=hr_id)
-        reg = Leads_Register.objects.get(id=pk)
-        reg.r_status=3
-        reg.save()
-        leads=Leads_Register.objects.filter(r_status=0,r_refference=hr_id)
-        return render(request,'hr_module/HR_upcoming_leads.html', {'mem': mem,'leads':leads})
-    else:
-        return redirect('/')
-
-    
-def HR_lead_reject(request,pk):
- 
-    if 'hr_id' in request.session:
-        if request.session.has_key('hr_id'):
-           hr_id = request.session['hr_id']
-        mem = user_registration.objects.filter(id=hr_id)
-        reg = Leads_Register.objects.get(id=pk)
-        reg.r_status=2
-        reg.save()
-        leads=Leads_Register.objects.filter(r_status=0,r_refference=hr_id)
-        return render(request,'hr_module/HR_upcoming_leads.html', {'mem': mem,'leads':leads})
-    else:
-        return redirect('/')
-
-
-def HR_update_lead_status(request,pk):
-     
-    if 'hr_id' in request.session:
-        if request.session.has_key('hr_id'):
-           hr_id = request.session['hr_id']
-        mem = user_registration.objects.filter(id=hr_id)
-        leads = Leads_Register.objects.get(id=pk,r_refference=hr_id)
-        
-        return render(request,'hr_module/HR_update_lead_status.html', {'mem': mem,'leads':leads})
-    else:
-        return redirect('/')
-    
-def HR_update_lead_data(request,pk):
-     
-    if 'hr_id' in request.session:
-        if request.session.has_key('hr_id'):
-           hr_id = request.session['hr_id']
-        mem = user_registration.objects.filter(id=hr_id)
-        leads = Leads_Register.objects.get(id=pk)
-         
-        if request.method == 'POST':
-
-            leads.r_fullname = request.POST['rname']
-            leads.r_email = request.POST['remail']
-            leads.r_phno = request.POST['rphno']
-            leads.r_place = request.POST['rplace']
-            leads.r_qulific = request.POST['rquli']
-            leads.r_refference = user_registration.objects.get(id=request.POST['rreffer'])
-            leads.r_dese = request.POST['rdesc']
-            leads.r_type = request.POST['rtype']
-
-            leads.r_pass_out_year = request.POST['ryear']
-            leads.r_fre_exp = request.POST['rfr_exp']
-            leads.r_lead_source = request.POST['l_source']
-
-            if request.POST['wdate']:
-                leads.r_wating_date =  request.POST['wdate']
-            else:
-                leads.r_wating_date =  leads.r_wating_date 
-
-            leads.r_type_status = request.POST['rstatus']
-            leads.save()
-
-        return redirect('HR_Waiting_leads')
-    else:
-        return redirect('/')
-
-
-def HR_update_lead_confirm(request,pk):
- 
-    if 'hr_id' in request.session:
-        if request.session.has_key('hr_id'):
-           hr_id = request.session['hr_id']
-        mem = user_registration.objects.filter(id=hr_id)
-        leads = Leads_Register.objects.get(id=pk,r_refference=hr_id)
-        leads.r_status=1
-        leads.r_completed_date=date.today()
-        leads.save()
-        
-        return redirect('HR_current_leads')
-    else:
-        return redirect('/')
-
-#============== 24/02/2023  End Upadation =============
-
 def HR_logout(request):
     if 'hr_id' in request.session:
         request.session.flush()
         return redirect('/')
     else:
         return redirect('/')
-
-
-
 
 #*******new******************************
 
@@ -18089,7 +17725,7 @@ def tm_designation(request):
         dept_id = request.GET.get('dept_id')
         
         br_id = department.objects.get(id=dept_id)
-        Desig = designation.objects.filter(~Q(designation="admin"),~Q(designation="manager"),~Q(designation="project manager"),~Q(designation="trainingmanager"),~Q(designation="developer"),~Q(designation="team leader"),~Q(designation="tester"),~Q(designation="account"), ~Q(designation="hr")).filter(branch_id=br_id.branch_id)
+        Desig = designation.objects.filter(~Q(designation="admin"),~Q(designation="manager"),~Q(designation="project manager"),~Q(designation="trainingmanager"),~Q(designation="developer"),~Q(designation="team leader"),~Q(designation="tester"),~Q(designation="accountant"), ~Q(designation="hr")).filter(branch_id=br_id.branch_id)
         return render(request,'tm_designation.html',{'mem':mem,'Desig': Desig, })
     else:
         return redirect('/')
@@ -20373,6 +20009,7 @@ def projectManager_project_delay(request):
     else:
         return redirect('/')
 
+
     
 def projectManager_warning(request,pmtaskwr_id):
     if 'prid' in request.session:
@@ -20392,7 +20029,7 @@ def projectManager_warning(request,pmtaskwr_id):
         warningdata.wrn_task=prjtask
         warningdata.wrn_reason=remark
         warningdata.save()
-        
+    
         return redirect('projectManager_project_delay')
     else:
         return redirect('/')
@@ -20518,6 +20155,7 @@ def Audit_training(request):
     else:
         return redirect('/')
 
+
 #Trainee Section ---->
 
 def Audit_trainee_trainer_dashboard(request,audit_traine_id):
@@ -20574,89 +20212,6 @@ def Audit_trainee_trainer_details(request,audit_ttrainer_id,audit_tm_id,audit_tr
         return render(request, 'audit_module/audit_traine_tainer_details.html', {'Aud': Aud,'trainer':trainer,'topics':topics,'tasks':tasks,'trainer_status':trainer_status})
     else:
         return redirect('/')
-
-
-#===================== Trainee Report  Genarate section ==================
-
-def audit_trainee_reportPDF(request,PDF_traineer_id):
-    
-  
-    date = datetime.now()    # Getting the current date
-
-    if request.method =="POST": # reading all the data 
-        p1=request.POST.get('trainee_project')
-        p2=request.POST.get('tainee_task')
-        p3=request.POST.get('trainee_topics')
-        p4=request.POST.get('trainee_leave')
-        p5=request.POST.get('trainee_feedbak')
-        p6=request.POST.get('trainee_probation')
-        formdate=request.POST.get('sdate')
-        todate=request.POST.get('edate')
- 
-
-    trainee = user_registration.objects.get(id=PDF_traineer_id)
-
-    if p1 == '1':
-
-        project_task = trainer_task.objects.filter(user_id=trainee.id,task_type=1)
-    else:
-        project_task=None
-    
-    if p2 == '1':
-        ttasks = trainer_task.objects.filter(user_id=trainee.id,task_type=0,startdate__gte=formdate,startdate__lte=todate)
-
-    else:
-        ttasks=None   
-    
-    if p3 == '1':
-        ttask = trainer_task.objects.filter(user_id=trainee.id,task_type=0)
-        team_names = ttask.values_list('team_name', flat=True)
-        ttopic = topic.objects.filter(team__in=team_names,startdate__gte=formdate,startdate__lte=todate)
-    else:
-        ttopic=None   
-   
-    if p4 == '1':
-        leave_data = leave.objects.filter(user=trainee,from_date__gte=formdate,from_date__lte=todate)
-
-    else:
-        leave_data=None   
-   
-    if p5 == '1':
-        
-        feedback_data = Feedbacks.objects.filter(fb_from=trainee,fb_date__gte=formdate,fb_date__lte=todate)
-    else:
-        feedback_data=None  
-
-    if p6 == '1':
-         t_prob=probation.objects.filter(user_id=trainee) 
-    else:
-        t_prob=None  
-   
-    tester_data = trainer_task_test.objects.all()
-    
-    content={'trainee':trainee,'date':date,'ttopic':ttopic,'ttasks':ttasks,'project_task':project_task,
-             'tester_data':tester_data,'leave_data':leave_data,'feedback_data':feedback_data,
-             'formdate':formdate,'todate':todate,'t_prob':t_prob}
-    
-    template_path = 'audit_module/audit_trainee_report_pdf.html'
-
-    # Create a Django response object, and specify content_type as pdf
-    response = HttpResponse(content_type='application/pdf')
-    #response['Content-Disposition'] = 'attachment; filename="certificate.pdf"'
-    response['Content-Disposition'] = 'filename="Trainee-Report.pdf"'
-     # find the template and render it.
-
-    template = get_template(template_path)
-    html = template.render(content)
-
-    # create a pdf
-    pisa_status = pisa.CreatePDF(
-    html, dest=response)
-
-    # if error then show some funy view
-    if pisa_status.err:
-        return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    return response
 
 # Trainee porobation Deatails
 def audit_probation(request,audit_tr_prob):
@@ -20718,7 +20273,7 @@ def Audit_department(request,audit_dep_id):
             return redirect('/')
         Aud = user_registration.objects.filter(id=Aud_id)
         mem = department.objects.get(id=audit_dep_id)
-        des=designation.objects.filter(~Q(designation='admin'),~Q(designation='manager'),~Q(designation='account'),~Q(designation='auditor'),~Q(designation='Digital manager'),~Q(designation='Digital Developer'),~Q(designation='trainee'))
+        des=designation.objects.filter(~Q(designation='admin'),~Q(designation='manager'),~Q(designation='accountant'),~Q(designation='auditor'),~Q(designation='Digital manager'),~Q(designation='Digital Developer'),~Q(designation='trainee'))
         context = {'mem':mem,'des':des,'Aud' : Aud,}
         return render(request, 'audit_module/audit_depart_designations.html',context)
     else:
@@ -20741,130 +20296,16 @@ def Audit_emp_list(request,audit_depart_id,audit_des_id):
             context = {'mem':mem,'use':use,'Aud' : Aud}
 
             return render(request, 'audit_module/audit_tester.html',context)
-        
 
         use=user_registration.objects.filter(department_id=mem.id,designation=mem1, status="active")
         context = {'mem':mem,'use':use,'Aud' : Aud,}
         return render(request, 'audit_module/audit_depart_designations_emp.html',context)
     else:
         return redirect('/')
-    
 
-def Audit_tester_works(request,pk):
-    if 'aud_id' in request.session:
-        if request.session.has_key('aud_id'):
-            Aud_id = request.session['aud_id']
-        else:
-            return redirect('/')
-        Aud = user_registration.objects.filter(id=Aud_id)
-        proj_list=project_taskassign.objects.filter(tester_id=pk).order_by('-submitted_date')
-        verify_num=project_taskassign.objects.filter(tester_id=pk, status='submitted').count()
-        pending_verify_num=project_taskassign.objects.filter(tester_id=pk, status='Verification').count()
-        correction_num=project_taskassign.objects.filter(tester_id=pk, status='correction').count()
-        tester_dely=TSproject_Task_verify.objects.filter(ts_tester_id=pk).order_by('-id')
-        delay_num=0
-        for i in tester_dely:
-            delay_num=delay_num+int(i.ts_delay)
-       
-        return render(request, 'audit_module/audit_tester_works.html', {'Aud': Aud,'proj_list':proj_list,'verify_num':verify_num,'pending_verify_num':pending_verify_num,'correction_num':correction_num,'tester_dely':tester_dely,'delay_num':delay_num})
-
-
-def Audit_tester_works_view(request,pk):
-    if 'aud_id' in request.session:
-        if request.session.has_key('aud_id'):
-            Aud_id = request.session['aud_id']
-        else:
-            return redirect('/')
-        Aud = user_registration.objects.filter(id=Aud_id)
-        tas=project_taskassign.objects.get(id=pk)
-        data1 = tester_status.objects.filter(task=tas).order_by('-id')
-        print(data1)
-        return render(request, 'audit_module/audit_tester_works_view.html', {'Aud': Aud,'tas':tas,'data1':data1})
 
 
 #Employee Report Pdf
-
-
-def Audit_empdaily_reportpdf(request,audit_rep_id):
-    date = datetime.now()  
-    if request.method =="POST":
-        
-        formdate=request.POST.get('emp_form')
-        todate=request.POST.get('emp_to')
-        user= user_registration.objects.get(id=audit_rep_id)
-       
-        
-        task = project_taskassign.objects.filter(developer_id=audit_rep_id,startdate__gte=formdate, enddate__lte=todate).order_by('startdate') 
-        for i in task:
-            print(i.id)
-
-        tester_data= TSproject_Task_verify.objects.filter(ts_project_task__in=task)
-
-       
-       
-        lev = leave.objects.filter(user_id=audit_rep_id,from_date__gte=formdate,from_date__lte=todate)
-        event1 = Event.objects.filter(start_time__range=(formdate,todate))
-       
-        if user.designation.designation == 'project manager':
-            proj = project.objects.filter(projectmanager_id=audit_rep_id,startdate__gte=formdate,startdate__lte=todate)
-            ptask = project_taskassign.objects.filter(project__in=proj,startdate__gte=formdate, enddate__lte=todate).order_by('startdate')
-          
-        else:
-            ptask=None
-            proj=None
-     
-       
-        tlev=0
-        for i in lev:
-            tlev=tlev + int(i.days)
-
-
-
-
-    print('tester:',tester_data)
-
-    template_path = 'audit_module/audit_emp_dailyreport_pdf.html'
-    context = {
-    
-    
-    'task':task,
-    'tester_data':tester_data,
-    'ptask':ptask,
-    'proj':proj,
-    
-    'date':date,
-    
-    'lev':lev,
-    
-    'tlev':tlev,
-    'event1':event1,
-    'user':user,
-    'formdate':formdate,
-    'todate':todate,
-   
-    'path':settings.NEWPATH,
-    }
-        
-    # Create a Django response object, and specify content_type as pdf
-    response = HttpResponse(content_type='application/pdf')
-    #response['Content-Disposition'] = 'attachment; filename="certificate.pdf"'
-    response['Content-Disposition'] = 'filename="Project-DailyTask-Report.pdf"'
-     # find the template and render it.
-
-    template = get_template(template_path)
-    html = template.render(context)
-
-    # create a pdf
-    pisa_status = pisa.CreatePDF(
-    html, dest=response)
-
-    # if error then show some funy view
-    if pisa_status.err:
-        return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    return response
-
-
-
 
 def Audit_emp_reportpdf(request,audit_rep_id):
     date = datetime.now()  
@@ -21373,43 +20814,6 @@ def Audit_action_taken(request):
         return redirect('/')
 
 
-@csrf_exempt
-def Audit_designation_list(request):
-    if 'aud_id' in request.session:
-        if request.session.has_key('aud_id'):
-            Aud_id = request.session['aud_id']
-        else:
-            return redirect('/')
-        Aud = user_registration.objects.filter(id=Aud_id)
-
-        dept_id = request.GET.get('dept_id')
-        
-        br_id = department.objects.get(id=dept_id)
-        
-        Desig = designation.objects.filter(~Q(designation="admin")).filter(branch_id=br_id.branch_id)
-        return render(request,'audit_module/audit_desig_list.html',{'Aud': Aud,'Desig': Desig})
-    else:
-        return redirect('/')
-
-
-@csrf_exempt
-def Audit_designationemp_list(request):
-    if 'aud_id' in request.session:
-        if request.session.has_key('aud_id'):
-            Aud_id = request.session['aud_id']
-        else:
-            return redirect('/')
-        Aud = user_registration.objects.filter(id=Aud_id)
-
-        dept_id = request.GET.get('dept_id')
-        desigId = request.GET.get('desigId')
-        br_id = department.objects.get(id=dept_id)
-        emps = user_registration.objects.filter(branch_id=br_id.branch_id,department=br_id, designation=desigId, status="active")
-
-        return render(request,'audit_module/audit_desig_list.html',{'Aud': Aud,'emps': emps})
-    else:
-        return redirect('/')
-
 
 # Tl Action Taken 
 def TL_action_taken(request):
@@ -21504,16 +20908,7 @@ def BRadmin_action_taken(request):
     else:
         return redirect('/')
 
-# acations taken to developer 
-def DEVaction(request):
-    if request.session.has_key('devid'):
-        devid = request.session['devid']
-    else:
-       return redirect('/')
-    dev = user_registration.objects.filter(id=devid)
-    devp = user_registration.objects.get(id=devid)
-    action_take=wrdata.objects.filter(wrn_develp=devp)
-    return render(request, 'DEVaction.html', {'dev': dev, 'devp': devp,  'action_take':action_take})
+
 
 
 
@@ -21603,1370 +20998,325 @@ def tl_emp_ajax(request):
         return redirect('/')
 
 
+#==================Shebin===========
 
-#======================= Start Data Colletor Section ==========================================================================
 
 
-# Data Collector  Dashboard created on 17-03-2023
-def DatacollectorDashboard(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
+def Audit_tester_works(request,pk):
+    if 'aud_id' in request.session:
+        if request.session.has_key('aud_id'):
+            Aud_id = request.session['aud_id']
         else:
             return redirect('/')
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        ldcount = Leads_Register.objects.all().count()
-        return render(request, 'data_collection/data_dashboard.html', {'data_collect': data_collect,'ldcount':ldcount})
-    else:
-        return redirect('/')
-
-
-
- 
-# Data Collector password Change
-
-def Datacollector_changepwd(request):
-    
-    if 'datacollector_id' in request.session:
-        
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']     
-        data_collect = user_registration.objects.filter(id=data_colletor_id)     
-        if request.method == 'POST':
-            abc = user_registration.objects.get(id=data_colletor_id)
-            cur = abc.password
-            oldps = request.POST["currentPassword"]
-            newps = request.POST["newPassword"]
-            cmps = request.POST["confirmPassword"]
-            if oldps == cur:
-                if oldps != newps:
-                    if newps == cmps:
-                        abc.password = request.POST.get('confirmPassword')
-                        abc.save()
-                        return render(request, 'data_collection/data_dashboard.html', {'data_collect': data_collect})
-                elif oldps == newps:
-                    messages.add_message(request, messages.INFO, 'Current and New password same')
-                else:
-                    messages.info(request, 'Incorrect password same')
-
-                return render(request, 'data_collection/data_dashboard.html', {'data_collect': data_collect})
-            else:
-                messages.add_message(request, messages.INFO, 'old password wrong')
-                return render(request, 'data_collection/datacolltor_change.html', {'data_collect': data_collect})
-        return render(request, 'data_collection/datacolltor_change.html', {'data_collect': data_collect})         
-    else:
-        return redirect('/')
-
-
-
-#******************** Data Colletor account setting****************************
-def Datacollector_accsetting(request):
-    if 'datacollector_id' in request.session:
-        
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        return render(request,'data_collection/data_accsetting.html', {'data_collect': data_collect})
-    else:
-        return redirect('/')
-
-def Datacollector_accsettingimagechange(request,id):
-    if 'datacollector_id' in request.session:
-        
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        if request.method == 'POST':
-            abc = user_registration.objects.get(id=id)
-            abc.photo = request.FILES['filename']
-            abc.save()
-            return redirect('Datacollector_accsetting')
-        return render(request,'data_collection/data_accsetting.html', {'data_collect': data_collect})
-    else:
-        return redirect('/')
-
-
-
-# Data Collector  logout
-def Datacollectorlogout(request):
-    if 'datacollector_id' in request.session:  
-        request.session.flush()
-        return redirect('/')
-    else:
-        return redirect('/')
-
-
-def datacollector_leads(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        cur_date=date.today()
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        ldcount = Leads_Register.objects.all().count()
-        ldassign = Leads_Register.objects.filter(r_assign_status = 1).count()
-        ldpending = Leads_Register.objects.filter(r_assign_status = 0).count()
-        ldcomplete = Leads_Register.objects.filter(r_status = 1).count()
-        tdldcount = Leads_Register.objects.filter(r_date=cur_date).count()
-        tdassingedldcount = Leads_Register.objects.filter(r_assign_status = 1,r_date=cur_date).count()
-        tdassingldcount = Leads_Register.objects.filter(r_assign_status = 0,r_date=cur_date ).count()
-        content= {'tdldcount':tdldcount,'tdassingldcount':tdassingldcount,'tdassingedldcount':tdassingedldcount}
-        return render(request, 'data_collection/datacollector_leads.html', {'data_collect': data_collect,'ldcount':ldcount,'ldcomplete':ldcomplete,'content':content,'ldassign':ldassign,'ldpending':ldpending})
-    else:
-        return redirect('/')
-
-
-
-def datacollector_registerleads(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        ldcount = Leads_Register.objects.all().count()
-        ld = Leads_Register.objects.all()
-        return render(request, 'data_collection/datacollector_registerleads.html', {'data_collect': data_collect,'ldcount':ldcount,'ld':ld})
-    else:
-        return redirect('/')
-
-
-def datacollector_Registered_search(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-
-        if request.method == 'POST':
-
-            ld = Leads_Register.objects.filter(r_date__gte=request.POST['register_stdate'], r_date__lte=request.POST['register_enddate'])
+        Aud = user_registration.objects.filter(id=Aud_id)
+        proj_list=project_taskassign.objects.filter(tester_id=pk).order_by('-submitted_date')
+        verify_num=project_taskassign.objects.filter(tester_id=pk, status='submitted').count()
+        pending_verify_num=project_taskassign.objects.filter(tester_id=pk, status='Verification').count()
+        correction_num=project_taskassign.objects.filter(tester_id=pk, status='correction').count()
+        tester_dely=TSproject_Task_verify.objects.filter(ts_tester_id=pk).order_by('-id')
+        delay_num=0
+        for i in tester_dely:
+            delay_num=delay_num+int(i.ts_delay)
        
-        return render(request, 'data_collection/datacollector_registerleads.html', {'data_collect': data_collect,'ld':ld})
-    else:
-        return redirect('/')
+        return render(request, 'audit_module/audit_tester_works.html', {'Aud': Aud,'proj_list':proj_list,'verify_num':verify_num,'pending_verify_num':pending_verify_num,'correction_num':correction_num,'tester_dely':tester_dely,'delay_num':delay_num})
+
+
+def Audit_tester_works_view(request,pk):
+    if 'aud_id' in request.session:
+        if request.session.has_key('aud_id'):
+            Aud_id = request.session['aud_id']
+        else:
+            return redirect('/')
+        Aud = user_registration.objects.filter(id=Aud_id)
+        tas=project_taskassign.objects.get(id=pk)
+        data1 = tester_status.objects.filter(task=tas).order_by('-id')
+        print(data1)
+        return render(request, 'audit_module/audit_tester_works_view.html', {'Aud': Aud,'tas':tas,'data1':data1})
 
 
 
+#========== new views =================
+
+@csrf_exempt
+def Audit_designation_list(request):
+    if 'aud_id' in request.session:
+        if request.session.has_key('aud_id'):
+            Aud_id = request.session['aud_id']
+        else:
+            return redirect('/')
+        Aud = user_registration.objects.filter(id=Aud_id)
+
+        dept_id = request.GET.get('dept_id')
         
-
-def datacollector_assingnedleads(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        ldcount = Leads_Register.objects.all().count()
-        ld = Leads_Register.objects.filter(r_assign_status = 1)
-        return render(request, 'data_collection/datacollector_assignedleads.html', {'data_collect': data_collect,'ldcount':ldcount,'ld':ld})
+        br_id = department.objects.get(id=dept_id)
+        
+        Desig = designation.objects.filter(~Q(designation="admin")).filter(branch_id=br_id.branch_id)
+        return render(request,'audit_module/audit_desig_list.html',{'Aud': Aud,'Desig': Desig})
     else:
         return redirect('/')
 
 
-def datacollector_assingnedleads_search(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
+@csrf_exempt
+def Audit_designationemp_list(request):
+    if 'aud_id' in request.session:
+        if request.session.has_key('aud_id'):
+            Aud_id = request.session['aud_id']
         else:
             return redirect('/')
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
+        Aud = user_registration.objects.filter(id=Aud_id)
 
-        if request.method == 'POST':
+        dept_id = request.GET.get('dept_id')
+        desigId = request.GET.get('desigId')
+        br_id = department.objects.get(id=dept_id)
+        emps = user_registration.objects.filter(branch_id=br_id.branch_id,department=br_id, designation=desigId, status="active")
 
-            ld = Leads_Register.objects.filter(r_assign_status = 1,r_assign_date__gte=request.POST['assing_stdate'], r_assign_date__lte=request.POST['assing_enddate'])
-         
-        return render(request, 'data_collection/datacollector_assignedleads.html', {'data_collect': data_collect,'ld':ld})
+        return render(request,'audit_module/audit_desig_list.html',{'Aud': Aud,'emps': emps})
     else:
         return redirect('/')
 
-
-    
-
-def datacollector_pendingleads(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
+def batch_complete(request,pk):
+    if 'usernametm2' in request.session:
+        if request.session.has_key('usernametm'):
+            usernametm = request.session['usernametm']
+        if request.session.has_key('usernametm1'):
+            usernametm1 = request.session['usernametm1']
         else:
             return redirect('/')
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        ldcount = Leads_Register.objects.all().count()
-        ld = Leads_Register.objects.filter(r_assign_status = 0)
-        return render(request, 'data_collection/datacollector_pendingleads.html', {'data_collect': data_collect,'ldcount':ldcount,'ld':ld})
+        mem = user_registration.objects.filter(designation_id=usernametm) .filter(fullname=usernametm1)
+        batc = Batch.objects.get(id=pk)
+        batc.bt_status=1
+        batc.save()
+        batc = Batch.objects.all()
+        return render(request, 'new_batch.html', {'mem': mem, 'batc': batc})
     else:
         return redirect('/')
 
-def datacollector_completed_leads(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        ldcount = Leads_Register.objects.all().count()
-        ld = Leads_Register.objects.filter(r_status = 1)
-        return render(request, 'data_collection/datacollector_completedleads.html', {'data_collect': data_collect,'ldcount':ldcount,'ld':ld})
-    else:
-        return redirect('/')
-
-
-    
-
-
-def datacollector_assignleads(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        ldcount = Leads_Register.objects.all().count()
-        desig= designation.objects.filter(designation='hr')
-        user_details= user_registration.objects.filter(designation__in=desig)
-        ld = Leads_Register.objects.filter(r_assing_id__isnull=True)
-        return render(request, 'data_collection/datacollector_assignleads.html', {'data_collect': data_collect,'ldcount':ldcount,'user_details':user_details,'desig':desig,'ld':ld})
-    else:
-        return redirect('/')
-    
-
-# current day details
-
-def datacollector_todyregisterleads(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        today=date.today()
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        ldcount = Leads_Register.objects.filter(r_date=today).count()
-        ld = Leads_Register.objects.filter(r_date=today) 
-        return render(request, 'data_collection/datacollector_registerleads.html', {'data_collect': data_collect,'ldcount':ldcount,'ld':ld})
-    else:
-        return redirect('/')
-
-
-def datacollector_todyassignedleads(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        today=date.today()
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        ldcount = Leads_Register.objects.filter(r_assign_date=today,r_assign_status = 1).count()
-        ld= Leads_Register.objects.filter(r_assign_date=today,r_assign_status = 1)
-        return render(request, 'data_collection/datacollector_assignedleads.html', {'data_collect': data_collect,'ldcount':ldcount,'ld':ld})
-    else:
-        return redirect('/')
-
-def datacollector_todypendingleads(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        today=date.today()
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        ldcount = Leads_Register.objects.filter(r_date=today,r_assign_status = 0).count()
-        ld = Leads_Register.objects.filter(r_date=today,r_assign_status = 0)
-        return render(request, 'data_collection/datacollector_pendingleads.html', {'data_collect': data_collect,'ldcount':ldcount,'ld':ld})
-    else:
-        return redirect('/')
-
-
-def data_assign_collector(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
+def taineestatuschange(request,pk):
+    if request.session.has_key('usernametm'):
+        usernametm = request.session['usernametm']
+        if request.session.has_key('usernametm1'):
+            usernametm1 = request.session['usernametm1']
         else:
             return redirect('/')
         
         if request.method == 'POST':
-            collector_id = user_registration.objects.get(id=int(request.POST['data_colector']))
-           
-            checked_data = request.POST.getlist('select_check_id')
-            if checked_data:
-                for i in checked_data:
-                    ld = Leads_Register.objects.get(id=i)
-                    ld.r_assing_id = user_registration.objects.get(id=collector_id.id)
-                    ld.r_assign_status=1
-                    ld.save()
-                    return redirect('datacollector_assignleads')
-
-            else:
-                    print('No data selected')
-                    messages.warning(request, 'No data selected. Please  check  Atlest  one  data  from  the  table  to  assign')
-                    return redirect('datacollector_assignleads')
-                   
-
-            # data_collect = user_registration.objects.filter(id=data_colletor_id)
-            # ldcount = Leads_Register.objects.all().count()
-           
-    else:
-        return redirect('/')
-
-
-def data_collector_register_save(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-
-        if request.method == 'POST':
-            if  Leads_Register.objects.filter(r_email=request.POST['dc_email']).exists() or Leads_Register.objects.filter(r_phno=request.POST['dc_phno']).exists():
-                
-                print('Duplicate Data Found')
-
-            else:
-
-                ld = Leads_Register()
-                ld.r_fullname = request.POST['dc_name']
-                ld.r_email = request.POST['dc_email']
-                ld.r_phno = request.POST['dc_phno']
-                ld.r_place = request.POST['dc_place']
-                ld.r_dese = request.POST['dc_other']
-                ld.r_refference = user_registration.objects.get(id=data_colletor_id)
-                ld.r_assign_date = date.today()
-                ld.save()
-                new_input_lable = request.POST.getlist('new_input_lable')
-                new_input_values = request.POST.getlist('new_input')
-                for lab,value in zip(new_input_lable,new_input_values):
-                    print(lab,":",value)
-                    lead_ex=LeadExtradata()
-                    lead_ex.leadid=ld
-                    lead_ex.lead_ex_head=lab
-                    lead_ex.lead_ex_data=value
-                    lead_ex.save()
-                
-
-        else:
-            print('Error, No data')
-
-
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        ldcount = Leads_Register.objects.all().count()
-        ld = Leads_Register.objects.all()
-        return render(request, 'data_collection/datacollector_registerleads.html', {'data_collect': data_collect,'ldcount':ldcount,'ld':ld})
-    else:
-        return redirect('/')
-
-
-def datacollector_Register_exdata(request,pk):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        today=date.today()
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        ld=Leads_Register.objects.get(id=pk)
-        leadex=LeadExtradata.objects.filter(leadid_id=pk)
-        return render(request, 'data_collection/datacollector_regextra.html', {'data_collect': data_collect,'leadex':leadex,'ld':ld})
-    else:
-        return redirect('/')
-
-
-
-#data collector Employeee section
-
-def datacollector_employees(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        today=date.today()
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        ldcount = Leads_Register.objects.filter(r_date=today,r_assign_status = 0).count()
-        ld = Leads_Register.objects.filter(r_assign_status = 1).values_list('r_assing_id', flat=True).distinct()
-       
-        lddata =  user_registration.objects.all()
-       
-        return render(request, 'data_collection/datacollector_employee.html', {'data_collect': data_collect,'ldcount':ldcount,'ld':ld,'lddata':lddata})
-    else:
-        return redirect('/')
-
-
-def data_collector_datas(request,pk):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        today=date.today()
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        data_collector = user_registration.objects.get(id=pk)
-        ldregcount = Leads_Register.objects.filter(r_refference=pk).count()
-        ldassignedcount = Leads_Register.objects.filter(r_assing_id=pk).count()
-        ldpencount = Leads_Register.objects.filter(Q(r_status=3) | Q(r_status=0),r_assing_id=pk).count()
-        ldcompletecount = Leads_Register.objects.filter(r_status=1,r_assing_id=pk).count()
-        ld = Leads_Register.objects.filter(r_refference=pk)
- 
-        return render(request, 'data_collection/datacollector_employee_datas.html', {'data_collect': data_collect,'data_collector':data_collector,
-        'ldregcount':ldregcount,'ld':ld,'ldassignedcount':ldassignedcount,'ldpencount':ldpencount,'ldcompletecount':ldcompletecount})
-    else:
-        return redirect('/')
-
-
-
-
-def data_collector_datas_serach(request,pk):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        today=date.today()
-        data_collector = user_registration.objects.get(id=pk)
-        if request.method == 'POST':
-            data_collect = user_registration.objects.filter(id=data_colletor_id)
-
-            if request.POST['check_id']:
-                check=int(request.POST['check_id'])
-            else:
-                 check=1
-            print(check)
-
-            ldregcount = Leads_Register.objects.filter(r_refference=pk,r_date__gte=request.POST['register_stdate'], r_date__lte=request.POST['register_enddate']).count()
-            ldassignedcount = Leads_Register.objects.filter(r_assing_id=pk,r_assign_date__gte=request.POST['register_stdate'], r_assign_date__lte=request.POST['register_enddate'],r_assign_status = 1).count()
-            ldpencount = Leads_Register.objects.filter(Q(r_status=3) | Q(r_status=0),r_assing_id=pk,r_date__gte=request.POST['register_stdate'], r_date__lte=request.POST['register_enddate']).count()
-            ldcompletecount = Leads_Register.objects.filter(r_status=1,r_assing_id=pk,r_completed_date__gte=request.POST['register_stdate'], r_completed_date__lte=request.POST['register_enddate']).count()
-            ld = Leads_Register.objects.filter(r_refference=pk,r_date__gte=request.POST['register_stdate'], r_date__lte=request.POST['register_enddate'])
-
-
-            if check == 1:
-                ld = Leads_Register.objects.filter(r_refference=pk,r_date__gte=request.POST['register_stdate'], r_date__lte=request.POST['register_enddate'])
-            elif check == 2:
-                ld = Leads_Register.objects.filter(r_assing_id=pk,r_assign_date__gte=request.POST['register_stdate'], r_assign_date__lte=request.POST['register_enddate'],r_assign_status = 1)
-            elif check == 3:
-                ld = Leads_Register.objects.filter(Q(r_status=3) | Q(r_status=0),r_assing_id=pk,r_date__gte=request.POST['register_stdate'], r_date__lte=request.POST['register_enddate'])
-            else:
-                check=4
-                ld = Leads_Register.objects.filter(r_status=1,r_assing_id=pk,r_completed_date__gte=request.POST['register_stdate'], r_completed_date__lte=request.POST['register_enddate'])
-
-
-
-            return render(request, 'data_collection/datacollector_employee_datas.html', {'data_collect': data_collect,'data_collector':data_collector,
-            'ldregcount':ldregcount,'ld':ld,'ldassignedcount':ldassignedcount,'ldpencount':ldpencount,'ldcompletecount':ldcompletecount,'check':check})
-        else:
-            return redirect('data_collector_datas',data_collector.id)
-    else:
-        return redirect('/')
-
-
-
-def datacollector_datas_check(request,pk,check):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-                data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        today=date.today()
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        data_collector = user_registration.objects.get(id=pk)
-        ldregcount = Leads_Register.objects.filter(r_refference=pk).count()
-        ldassignedcount = Leads_Register.objects.filter(r_assing_id=pk).count()
-        ldpencount = Leads_Register.objects.filter(Q(r_status=3) | Q(r_status=0),r_assing_id=pk).count()
-        ldcompletecount = Leads_Register.objects.filter(r_status=1,r_assing_id=pk).count()
-
-        if check == 1:
-            ld = Leads_Register.objects.filter(r_refference=pk)
-        elif check == 2:
-            ld = Leads_Register.objects.filter(r_assing_id=pk)
-        elif check == 3:
-             ld = Leads_Register.objects.filter(Q(r_status=3) | Q(r_status=0),r_assing_id=pk)
-        else:
-            check=4
-            ld = Leads_Register.objects.filter(r_status=1,r_assing_id=pk)
-
     
-        return render(request, 'data_collection/datacollector_employee_datas.html', {'data_collect': data_collect,'data_collector':data_collector,
-            'ldregcount':ldregcount,'ld':ld,'ldassignedcount':ldassignedcount,'ldpencount':ldpencount,'ldcompletecount':ldcompletecount,'check':check})
+            k=user_registration.objects.get(id=pk)
+            k.trainee_status=request.POST['status_change']
+            k.save()
+            return redirect('Trainee')
+    
     else:
         return redirect('/')
 
 
 
+def Audit_empdaily_reportpdf(request,audit_rep_id):
+    date = datetime.now()  
+    if request.method =="POST":
+        
+        formdate=request.POST.get('emp_form')
+        todate=request.POST.get('emp_to')
+        user= user_registration.objects.get(id=audit_rep_id)
+       
+        
+        task = project_taskassign.objects.filter(developer_id=audit_rep_id,startdate__gte=formdate, enddate__lte=todate).order_by('startdate') 
+        for i in task:
+            print(i.id)
 
-#Data Collector Analiyis Section
-def datacollector_analiyis(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        cur_date=date.today()
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        ldcount = Leads_Register.objects.all().count()
-        ldassign = Leads_Register.objects.filter(r_assign_status = 1).count()
-        ldpending = Leads_Register.objects.filter(r_assign_status = 0).count()
-        tdldcount = Leads_Register.objects.filter(r_date=cur_date).count()
-        tdassingedldcount = Leads_Register.objects.filter(r_assign_status = 1,r_date=cur_date).count()
-        tdassingldcount = Leads_Register.objects.filter(r_assign_status = 0,r_date=cur_date ).count()
-        tdcomplete = Leads_Register.objects.filter(r_status = 1 ).count()
+        tester_data= TSproject_Task_verify.objects.filter(ts_project_task__in=task)
 
-        return render(request, 'data_collection/datacollector_analiyis.html', {'data_collect': data_collect,'ldcount':ldcount,'ldassign':ldassign,'ldpending':ldpending,'tdcomplete':tdcomplete})
-    else:
-        return redirect('/')
-
-
-
-def datacollector_lead_analiyisearch(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        cur_date=date.today()
-
-        if request.method == 'POST':
-
-           
-            ldcount = Leads_Register.objects.filter(r_date__gte=request.POST['register_stdate'], r_date__lte=request.POST['register_enddate']).count()
-            ldassign = Leads_Register.objects.filter(r_assign_date__gte=request.POST['register_stdate'], r_assign_date__lte=request.POST['register_enddate'],r_assign_status = 1).count()
-            ldpending = Leads_Register.objects.filter(r_date__gte=request.POST['register_stdate'], r_date__lte=request.POST['register_enddate'],r_assign_status = 0).count()
-           
-            tdcomplete = Leads_Register.objects.filter(r_completed_date__gte=request.POST['register_stdate'], r_completed_date__lte=request.POST['register_enddate'],r_status = 1 ).count()
-
-        return render(request, 'data_collection/datacollector_analiyis.html', {'data_collect': data_collect,'ldcount':ldcount,'ldassign':ldassign,'ldpending':ldpending,'tdcomplete':tdcomplete})
        
        
-    else:
-        return redirect('/')
-
-
-
-
-def lead_fileupload(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        ldcount = Leads_Register.objects.all().count()
-        ld = Leads_Register.objects.all()
-        if request.method == 'POST':
-            file_up=request.FILES.get('leadfile')
-            
-            df = pd.read_excel(file_up)
-            for _, row in df.iterrows():
-                if Leads_Register.objects.filter(Q(r_email=row['email'])| Q(r_phno=row['phno'])).exists():
-
-                    print('Duplicate Data Found')
-                else:
-
-                    obj = Leads_Register()
-                    obj.r_fullname=row['Name']
-                    obj.r_email=row['email']
-                    obj.r_phno=row['phno']
-                    obj.r_place=row['place']
-                    obj.r_dese=row['details']
-                    obj.r_refference=  user_registration.objects.get(id=data_colletor_id)
-                    obj.save()
-
-
-        return render(request, 'data_collection/datacollector_registerleads.html', {'data_collect': data_collect,'ldcount':ldcount,'ld':ld})
-    else:
-        return redirect('/')
-
-
-#leave Section
-def data_leave(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-
-        return render(request, 'data_collection/data_leave.html', {'data_collect': data_collect})
-    else:
-        return redirect('/')
-
-
-
-def data_leave_form(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
+        lev = leave.objects.filter(user_id=audit_rep_id,from_date__gte=formdate,from_date__lte=todate)
+        event1 = Event.objects.filter(start_time__range=(formdate,todate))
        
-
-        return render(request, 'data_collection/data_leave_form.html', {'data_collect': data_collect})
-    else:
-        return redirect('/')
-
-
-def data_leave_apply(request):
-    if 'datacollector_id' in request.session:
-        if request.session.has_key('datacollector_id'):
-            data_colletor_id = request.session['datacollector_id']
-        else:
-            return redirect('/')
-        data_collect = user_registration.objects.filter(id=data_colletor_id)
-        data_id = user_registration.objects.get(id=int(request.POST['dev_id']))
-    
-        if request.method == "POST":
-            leaves = leave()
-            leaves.from_date = request.POST['from']
-            leaves.to_date = request.POST['to']
-            leaves.leave_status = request.POST['haful']
-            leaves.reason = request.POST['reason']
-            leaves.leaveapprovedstatus=0
-            leaves.user_id = request.POST['dev_id']
-            leaves.designation_id = data_id.id
-            
-            start = datetime.strptime(leaves.from_date, '%Y-%m-%d').date() 
-            end = datetime.strptime(leaves.to_date, '%Y-%m-%d').date()
-
-            diff = (end  - start).days
-            
-            cnt =  Event.objects.filter(start_time__range=(start,end)).count()
-            
-            if diff == 0:
-                leaves.days = 1
-            else:
-                leaves.days = diff - cnt
-                
-            leaves.save()
-            return render(request, 'data_collection/data_leave.html', {'data_collect': data_collect})
-        else:
-            return render(request, 'data_collection/data_leave_form.html', {'data_collect': data_collect})
-    else:
-        return redirect('/')
-
-
-
-
-def data_collectorleaverequiest(request):
-    if 'datacollector_id' in request.session:
-            if request.session.has_key('datacollector_id'):
-                data_colletor_id = request.session['datacollector_id']
-            else:
-                return redirect('/')
-            data_collect = user_registration.objects.filter(id=data_colletor_id)
-            data_col = leave.objects.filter(user_id=data_colletor_id)
-       
-            return render(request, 'data_collection/data_leave_requests.html', {'data_collect': data_collect, 'data_col': data_col})
-    else:
-        return redirect('/')
-
-
-
-
-
-
-# ===================== OFFICE ADMIN SECTION ===========================================
-
-# =========== OFFICE ADMIN  PROFILE DASHBOARD =================
-
-def OFadmin_profiledash(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')
-        of_Adm = user_registration.objects.filter(id=ofadmin_id)
-        reg_count = user_registration.objects.all().count()
-        leads_count=Leads_Register.objects.filter(r_type='Internship').count()
-        
-        return render(request, 'office_admin/dashboard.html', {'of_Adm':of_Adm,'reg_count':reg_count,'leads_count':leads_count})
-    else:
-        return redirect('/')
-
-
-
-# ============= OFFICE ADMIN  - Registration view section ==================
-
-def of_admin_registrationview(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')   
-    of_Adm = user_registration.objects.filter(id=ofadmin_id)
-    return render(request,'office_admin/OFadmin_registrationview.html',{'of_Adm':of_Adm})
-
-
-
-# ============== OFFICE ADMIN  - Current Registration view section ====================
-
-    
-def ofadmin_registration(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')    
-        
-    if 'stop_status' in request.POST:
-        uid = request.POST.get("His_id")
-        user = user_registration.objects.get(id=uid)
-        if user.status=="active":
-            user.status="stop"
-            user.save()
-            return redirect("ofadmin_registration")
-        else:
-            user.status="active"
-            user.save()
-            return redirect("ofadmin_registration")
-    else:    
-        if  request.method=="POST":
-            u_id = request.POST.get("id")
-            dept_id = request.POST.get("dept")
-            desi_id = request.POST.get("des")
-            emp_ty = request.POST.get("emp_type")
-            res = request.POST.get("stat")
-
-            user = user_registration.objects.get(id=u_id)
-            user.department_id = dept_id 
-            user.status = res
-            user.employee_type=emp_ty
-            user.designation_id = desi_id
-            if desi_id == '6' or desi_id == '4':
-                user.work_status='0'
-            user.save()
-            return redirect("ofadmin_registration")
-        
-        of_Adm = user_registration.objects.filter(id=ofadmin_id)
-        mem1 = user_registration.objects.filter(~Q(status="resigned")).order_by("-id")
-        mem2 = designation.objects.filter(~Q(designation="admin"))
-        mem3 = department.objects.all()
-        return render(request,'office_admin/OFadmin_registration.html',{'mem3':mem3,'mem2':mem2,'of_Adm':of_Adm,'mem1':mem1})
-
-
-
-# ============== OFFICE ADMIN  -  Registration Delete section ====================
-
-        
-def ofadmin_registrationdelete(request,id):
-    man = user_registration.objects.get(id=id)
-  
-    man1 = extracurricular.objects.get(user_id=man.id)
-    man2 = qualification.objects.get(user_id=man.id)
-    man2.delete()
-    man1.delete()
-    man.delete()
-
-    os.remove(man.idproof.path)
-    os.remove(man.photo.path
-              )
-    return redirect('ofadmin_registration')
-    
-
-# ============== OFFICE ADMIN  - New Registration view section ====================
-
-def OFadmin_new_registration(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')    
-        
-    if request.method == "POST":
-        u_id = request.POST.get("id")
-        dept_id = request.POST.get("dept")
-        desi_id = request.POST.get("des")
-        res = request.POST.get("stat")
-
-        user = user_registration.objects.get(id=u_id)
-        user.department_id = dept_id
-        user.status = res
-        user.designation_id = desi_id
-        user.save()
-        return redirect("OFadmin_new_registration")
-    of_Adm = user_registration.objects.filter(id=ofadmin_id)
-    mem1 = user_registration.objects.filter(~Q(status="resigned"),reg_status=0).order_by("-id")
-    mem2 = designation.objects.filter(~Q(designation="admin"))
-    mem3 = department.objects.all()
-    return render(request, 'office_admin/OFadmin_new_registration.html', {'mem3': mem3, 'mem2': mem2, 'of_Adm': of_Adm, 'mem1': mem1})
-
-
-
-# ==================== OFFICE ADMIN  - Resign view section ====================
-        
-def ofadmin_resign(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')       
-    if request.method=="POST":
-        u_id = request.POST.get("id")
-        dept_id = request.POST.get("dept")
-        desi_id = request.POST.get("des")
-        user = user_registration.objects.get(id=u_id)
-        user.department_id = dept_id 
-        
-        user.designation_id = desi_id
-        user.save()
-        return redirect("BRadmin_registration")
-   
-    of_Adm = user_registration.objects.filter(id=ofadmin_id)
-    mem1 = user_registration.objects.filter(status="resigned").order_by("-id")
-    mem2 = designation.objects.all()
-    mem3 = department.objects.all()
-    return render(request,'office_admin/OFadmin_resign.html',{'mem3':mem3,'mem2':mem2,'of_Adm':of_Adm,'mem1':mem1})
-
-
-# ==================== OFFICE ADMIN - Registaration Approvel ====================
-
-def of_admin_registrationstatus(request, id):
-    man = user_registration.objects.get(id=id)
-    man.reg_status = "1"    
-    man.save()
-    return redirect('OFadmin_new_registration')
-
-
-
-# ============= OFFICE ADMIN  - Registration view section ==================
-
-def of_admin_request(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')   
-    of_Adm = user_registration.objects.filter(id=ofadmin_id)
-    mem3 = user_registration.objects.all()
-    return render(request,'office_admin/OFadmin_request.html',{'of_Adm':of_Adm,'mem3':mem3})
-
-
-def ofadmin_request_formSubmit(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')  
-
-        
-        if request.method == 'POST':
-
-            canidate = user_registration.objects.get(id=int(request.POST['nameInputId']))
-            select_opt = request.POST.getlist('certficate_select')
-
-            for opt in select_opt:
-
-                certificate = Certificate_approve()
-                certificate.cf_develp = canidate
-                certificate.cf_certificate = opt
-                certificate.save()
-        
-    of_Adm = user_registration.objects.filter(id=ofadmin_id)
-    mem3 = user_registration.objects.all()
-    return render(request,'office_admin/OFadmin_request.html',{'of_Adm':of_Adm,'mem3':mem3})
-
-    
-    
-def ofadmin_requestView(request):
-
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')   
-        of_Adm = user_registration.objects.filter(id=ofadmin_id)
-        request_list = Certificate_approve.objects.filter(cf_category=0).order_by('-id')
-        return render(request,'office_admin/OFadmin_requestList.html',{'of_Adm':of_Adm,'request_list':request_list})
-    
-    else:
-        return redirect('/')   
-
-
-# Status change after the dwnload button click
-def ofadmin_request_status_change(request,req_id):
-
-    request_list = Certificate_approve.objects.get(id=req_id)
-    request_list.cf_status = 3
-    request_list.save()
-    if request_list.cf_category == 0:
-        return redirect('ofadmin_requestView')
-    else:
-        return redirect('ofadmin_internship_requestView')
-
-
-def OFadmin_man_registration_update(request, id):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/') 
-        of_Adm = user_registration.objects.filter(id=ofadmin_id)
-
-        mem4 = user_registration.objects.get(id=id)
-        con = conditions.objects.get(id=1)
-        try:
-            xem = extracurricular.objects.get(user_id=id)
-        except extracurricular.DoesNotExist:
-            xem = None
-        try:
-            qem = qualification.objects.get(user_id=id)
-        except qualification.DoesNotExist:
-            qem= None
-        des = designation.objects.filter(~Q(designation='admin'))
-      
-        desig = designation.objects.all().exclude(designation = 'team leader').exclude(designation ='manager').exclude(designation ='trainee').exclude(designation ='project manager').exclude(designation ='tester').exclude(designation ='trainingmanager').exclude(designation ='account').exclude(designation ='trainer').exclude(designation ='developer')
-
-        admins = user_registration.objects.get(id=ofadmin_id)
-        try:
-            br_name = branch_registration.objects.get(id=admins.id)
-        except branch_registration.DoesNotExist:
-            br_name= None
-
-        return render(request, 'office_admin/OFadmin_man_registration_update.html', {'con': con, 'mem4': mem4, 'qem': qem, 'xem': xem, 'of_Adm': of_Adm, 'des': des, 'br_name': br_name, 'desig':desig})
-    else:
-        return redirect('/')
-    
-    
-def OFadmin_registrationupdatesave(request, id):
-    a = user_registration.objects.get(id=id)
-    try:
-        b = qualification.objects.get(user_id=id)
-    except qualification.DoesNotExist:
-        b = None
-    try:
-        c = extracurricular.objects.get(user_id=id)
-    except extracurricular.DoesNotExist:
-        c = None
-
-    d = conditions.objects.get(id=1)
-    if request.method == 'POST':
-        a.fullname = request.POST['name']
-        a.fathername = request.POST['fathersname']
-        a.mothername = request.POST['mothersname']
-        a.presentaddress1 = request.POST['presentaddress1']
-        a.presentaddress2 = request.POST['presentaddress2']
-        a.presentaddress3 = request.POST['presentaddress3']
-        a.pincode = request.POST['pincode']
-        a.district = request.POST['district']
-        a.state = request.POST['state']
-        a.permanentaddress1 = request.POST['permanentaddress1']
-        a.permanentaddress2 = request.POST['permanentaddress2']
-        a.permanentaddress3 = request.POST['permanentaddress3']
-        a.permanentpincode = request.POST['permanentpincode']
-        a.permanentdistrict = request.POST['permanentdistrict']
-        a.permanentstate = request.POST['permanentstate']
-        a.designation_id = request.POST['designation']
-        a.desig_input = request.POST['desg']
-        a.department_input = request.POST['department_current']
-        a.mobile = request.POST['mobile']
-        a.alternativeno = request.POST['altmobile1']
-        a.email = request.POST['email']
-        a.hrmanager = request.POST['hrname']
-        a.joiningdate = request.POST['dateofjoin']
-        a.startdate = request.POST['startdate']
-        a.enddate = request.POST['enddate']
-        a.workperformance = request.POST['performance']
-        a.hr_designation = request.POST['hrdesignation']
-        if request.FILES.get('signature') is not None:
-            a.signature = request.FILES['signature']
-        a.save()
-
-        if b:
-            b.user_id = a.id
-            b.school = request.POST['school']
-            b.schoolaggregate = request.POST['aggregate']
-            b.ugdegree = request.POST['degree']
-            b.ugstream = request.POST['stream']
-            b.ugpassoutyr = request.POST['passoutyear']
-            b.ugaggregrate = request.POST['aggregate1']
-            b.pg = request.POST['pg']
-            b.save()
-        
-        if c :
-            c.user_id = a.id
-            c.internshipdetails = request.POST['details']
-            c.internshipduration = request.POST['duration1']
-            c.internshipcertificate = request.POST['certification']
-            c.onlinetrainingdetails = request.POST['details1']
-            c.onlinetrainingduration = request.POST['duration2']
-            c.onlinetrainingcertificate = request.POST['certification1']
-            c.projecttitle = request.POST['title']
-            c.projectduration = request.POST['duration3']
-            c.projectdescription = request.POST['description']
-            c.projecturl = request.POST['url']
-            c.skill1 = request.POST['skill1']
-            c.skill2 = request.POST['skill2']
-            c.skill3 = request.POST['skill3']
-            c.save()
-            
-        d.condition1 = request.POST.get("condition1")
-        d.condition2 = request.POST.get("condition2")
-        d.condition3 = request.POST.get("condition3")
-        d.condition4 = request.POST.get("condition4")
-        d.condition5 = request.POST.get("condition5")
-        d.condition6 = request.POST.get("condition6")
-        d.save()
-        return redirect('ofadmin_registration')
-        
-
-
-
-# ===================== OFFICE ADMIN  INTERNSHIP SECTION ===============
-
-def OFadmin_internship_view(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')       
-        of_Adm = user_registration.objects.filter(id=ofadmin_id)
-        return render(request,'office_admin/OFadmin_internship_view.html',{'of_Adm':of_Adm})
-    
-    else:
-        return redirect('/')   
-
-
-def OFadmin_internship(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/') 
-        of_Adm = user_registration.objects.filter(id=ofadmin_id)
-        var1=internship.objects.all().order_by("-id")
-        return render(request,'office_admin/OFadmin_internship.html',{'var1':var1,'of_Adm':of_Adm})
-    else:
-        return redirect('/')
-
-
-def OFadmin_internship_request(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/') 
-        of_Adm = user_registration.objects.filter(id=ofadmin_id)
-        var1=internship.objects.all().order_by("-id")
-        return render(request,'office_admin/OFadmin_internship_request.html',{'var1':var1,'of_Adm':of_Adm})
-    else:
-        return redirect('/')
-
-
-def ofadmin_internship_request_formSubmit(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')  
-
-        
-        if request.method == 'POST':
-
-            canidate = internship.objects.get(id=int(request.POST['nameInputId']))
-            select_opt = request.POST.getlist('certficate_select')
-
-            for opt in select_opt:
-
-                certificate = Certificate_approve()
-                certificate.cf_intern = canidate
-                certificate.cf_category =1
-                certificate.cf_certificate = opt
-                certificate.save()
-        
-    of_Adm = user_registration.objects.filter(id=ofadmin_id)
-    var1 = internship.objects.all()
-    return render(request,'office_admin/OFadmin_internship_request.html',{'of_Adm':of_Adm,'var1':var1})
-
-
-def ofadmin_internship_requestView(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')   
-        of_Adm = user_registration.objects.filter(id=ofadmin_id)
-        request_list = Certificate_approve.objects.filter(cf_category=1).order_by('-id')
-        return render(request,'office_admin/OFadmin_iternship_requestList.html',{'of_Adm':of_Adm,'request_list':request_list})
-    
-    else:
-        return redirect('/')   
-
-
-
-def OFadmin_internship_date(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')  
+        if user.designation.designation == 'project manager':
+            proj = project.objects.filter(projectmanager_id=audit_rep_id,startdate__gte=formdate,startdate__lte=todate)
+            ptask = project_taskassign.objects.filter(project__in=proj,startdate__gte=formdate, enddate__lte=todate).order_by('startdate')
           
-    of_Adm = user_registration.objects.filter(id=ofadmin_id)
-    newdata = internship.objects.all().values('reg_date').distinct()
-    return render(request,'office_admin/OFadmin_internship_date.html',{'of_Adm':of_Adm,'newdata':newdata})  
-
-
-
-def OFadmin_internship_dateview(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
         else:
-            return redirect('/')    
-        of_Adm = user_registration.objects.filter(id=ofadmin_id)
-        reg_date=request.GET.get('date')
-        empid=internship.objects.filter(reg_date=reg_date)
-        return render(request,'office_admin/OFadmin_internship_dateview.html',{'of_Adm':of_Adm,'data':empid})
-   
-
-def OFadmin_internship_pending(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')   
-        of_Adm = user_registration.objects.filter(id=ofadmin_id)
-
-        data=internship.objects.filter(complete_status='0')
-        use=internship_type.objects.all()
-    
-        return render(request, 'office_admin/OFadmin_internship_pending.html', {'data': data,'use': use,'of_Adm':of_Adm})
-    
-
-def OFadmin_internship_acc_approved(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')  
-    of_Adm = user_registration.objects.filter(id=ofadmin_id)
-    data=internship.objects.filter(verify_status='1')
-    use=internship_type.objects.all()
-
-    return render(request, 'office_admin/OFadmin_internship_acc_approved.html', {'data': data ,'use':use, 'of_Adm':of_Adm})
-
-
-def OFadmin_internship_update(request,id):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')  
-    of_Adm = user_registration.objects.filter(id=ofadmin_id)
-    var = internship.objects.get(id=id)
-    return render(request,'office_admin/OFadmin_internship_update.html',{'var':var,'of_Adm':of_Adm})
-
-
-def OFadmin_internshipupdatesave(request,id):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')    
-    of_Adm = user_registration.objects.filter(id=ofadmin_id)
-    var = internship.objects.get(id=id)
-    var.fullname = request.POST['fullname']
-    var.collegename = request.POST['college']
-    var.reg_no = request.POST['regno']
-    var.course = request.POST['course']
-    var.stream = request.POST['stream']        
-    var.platform = request.POST['platform']        
-    #var.branch_id  =  request.POST['branch']        
-    var.start_date =  request.POST['startdate']        
-    var.end_date  =  request.POST['enddate']        
-    var.mobile  =  request.POST['mobile']        
-    var.alternative_no  =  request.POST['altmob']        
-    var.email = request.POST['email']
-    var.hrmanager = request.POST['hrmanager']
-    var.guide = request.POST['guide']
-    var.rating = request.POST['rating']
-    
-    if request.FILES.get('profile_pic') is not None:
-         var.profile_pic  =  request.FILES['profile_pic']
-    var.save()
-    return redirect('OFadmin_internship')
-
-
-
-def OFadmin_interndelete(request,id):
-    man = internship.objects.get(id=id)
-    man.delete()
-    return redirect('OFadmin_internship')
-
-
-
-# ===================== END OFFICE ADMIN SECTION ======================================
-
-
-
-# ======== ADMIN Request Approve Section ======================================
-
-def BRadmin_request(request):
-    if 'Adm_id' in request.session:
-        if request.session.has_key('Adm_id'):
-            Adm_id = request.session['Adm_id']
-        else:
-            return redirect('/')
-        
-        Adm = user_registration.objects.filter(id=Adm_id)
-        emp_requests = Certificate_approve.objects.filter(cf_status=0,cf_category=0)
-        intern_requests = Certificate_approve.objects.filter(cf_status=0,cf_category=1)
-        return render(request,'BRadmin_request.html',{'Adm':Adm,'emp_requests':emp_requests,'intern_requests':intern_requests})
-    else:
-        return redirect('/')
-    
-
-def BRadmin_request_approve(request,app_id): 
-    request_list=Certificate_approve.objects.get(id=app_id)   
-    request_list.cf_status = 1
-    request_list.cf_approve_date = date.today()
-    request_list.save()
-    return redirect('BRadmin_request')
-
-def BRadmin_request_decline(request,dec_id): 
-    request_list=Certificate_approve.objects.get(id=dec_id)   
-    request_list.cf_status = 2
-    request_list.cf_approve_date = date.today()
-    request_list.save()
-    return redirect('BRadmin_request')
-
-
-# ================== OFFICE ADMIN ACCOUNT-SECTION ================
-
-def OFadmin_accsetting(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')
-        of_Adm = user_registration.objects.filter(id=ofadmin_id)
-        return render(request,'office_admin/OFadmin_accsetting.html', {'of_Adm': of_Adm})
-    else:
-        return redirect('/')
-
-def OFadmin_accsettingimagechange(request,id):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')
-        
-        of_Adm = user_registration.objects.filter(id=ofadmin_id)
-        if request.method == 'POST':
-            abc = user_registration.objects.get(id=id)
-            abc.photo = request.FILES['filename']
-            abc.save()
-            return redirect('OFadmin_accsetting')
-        return render(request, 'office_admin/OFadmin_accsetting.html',{'of_Adm':of_Adm})
-    else:
-        return redirect('/')
-
-
-def OFadmin_changepwd(request):
-    
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')    
-        of_Adm = user_registration.objects.filter(id=ofadmin_id)     
-        if request.method == 'POST':
-            abc = user_registration.objects.get(id=ofadmin_id)
-            cur = abc.password
-            oldps = request.POST["currentPassword"]
-            newps = request.POST["newPassword"]
-            cmps = request.POST["confirmPassword"]
-            if oldps == cur:
-                if oldps != newps:
-                    if newps == cmps:
-                        abc.password = request.POST.get('confirmPassword')
-                        abc.save()
-                        return render(request, 'office_admin/dashboard.html', {'of_Adm': of_Adm})
-                elif oldps == newps:
-                    messages.add_message(request, messages.INFO, 'Current and New password same')
-                else:
-                    messages.info(request, 'Incorrect password same')
-
-                return render(request, 'office_admin/dashboard.html', {'of_Adm': of_Adm})
-            else:
-                messages.add_message(request, messages.INFO, 'old password wrong')
-                return render(request, 'office_admin/OFadmin_changepwd.html', {'of_Adm': of_Adm})
-        return render(request, 'office_admin/OFadmin_changepwd.html', {'of_Adm': of_Adm})         
-    else:
-        return redirect('/')
-
-
-def OFadmin_leavestatus(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')    
-        of_Adm = user_registration.objects.filter(id=ofadmin_id) 
-        return render(request, 'office_admin/OFadmin_leave.html', {'of_Adm': of_Adm})   
+            ptask=None
+            proj=None
      
+       
+        tlev=0
+        for i in lev:
+            tlev=tlev + int(i.days)
+
+
+
+
+    print('tester:',tester_data)
+
+    template_path = 'audit_module/audit_emp_dailyreport_pdf.html'
+    context = {
+    
+    
+    'task':task,
+    'tester_data':tester_data,
+    'ptask':ptask,
+    'proj':proj,
+    
+    'date':date,
+    
+    'lev':lev,
+    
+    'tlev':tlev,
+    'event1':event1,
+    'user':user,
+    'formdate':formdate,
+    'todate':todate,
+   
+    'path':settings.NEWPATH,
+    }
+        
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    #response['Content-Disposition'] = 'attachment; filename="certificate.pdf"'
+    response['Content-Disposition'] = 'filename="Project-DailyTask-Report.pdf"'
+     # find the template and render it.
+
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+    html, dest=response)
+
+    # if error then show some funy view
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+
+def audit_trainee_reportPDF(request,PDF_traineer_id):
+    
+  
+    date = datetime.now()    # Getting the current date
+
+    if request.method =="POST": # reading all the data 
+        p1=request.POST.get('trainee_project')
+        p2=request.POST.get('tainee_task')
+        p3=request.POST.get('trainee_topics')
+        p4=request.POST.get('trainee_leave')
+        p5=request.POST.get('trainee_feedbak')
+        p6=request.POST.get('trainee_probation')
+        formdate=request.POST.get('sdate')
+        todate=request.POST.get('edate')
+ 
+
+    trainee = user_registration.objects.get(id=PDF_traineer_id)
+
+    if p1 == '1':
+
+        project_task = trainer_task.objects.filter(user_id=trainee.id,task_type=1)
     else:
-        return redirect('/')    
+        project_task=None
+    
+    if p2 == '1':
+        ttasks = trainer_task.objects.filter(user_id=trainee.id,task_type=0,startdate__gte=formdate,startdate__lte=todate)
+
+    else:
+        ttasks=None   
+    
+    if p3 == '1':
+        ttask = trainer_task.objects.filter(user_id=trainee.id,task_type=0)
+        team_names = ttask.values_list('team_name', flat=True)
+        ttopic = topic.objects.filter(team__in=team_names,startdate__gte=formdate,startdate__lte=todate)
+    else:
+        ttopic=None   
+   
+    if p4 == '1':
+        leave_data = leave.objects.filter(user=trainee,from_date__gte=formdate,from_date__lte=todate)
+
+    else:
+        leave_data=None   
+   
+    if p5 == '1':
+        
+        feedback_data = Feedbacks.objects.filter(fb_from=trainee,fb_date__gte=formdate,fb_date__lte=todate)
+    else:
+        feedback_data=None  
+
+    if p6 == '1':
+         t_prob=probation.objects.filter(user_id=trainee) 
+    else:
+        t_prob=None  
+   
+    tester_data = trainer_task_test.objects.all()
+    
+    content={'trainee':trainee,'date':date,'ttopic':ttopic,'ttasks':ttasks,'project_task':project_task,
+             'tester_data':tester_data,'leave_data':leave_data,'feedback_data':feedback_data,
+             'formdate':formdate,'todate':todate,'t_prob':t_prob}
+    
+    template_path = 'audit_module/audit_trainee_report_pdf.html'
+
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    #response['Content-Disposition'] = 'attachment; filename="certificate.pdf"'
+    response['Content-Disposition'] = 'filename="Trainee-Report.pdf"'
+     # find the template and render it.
+
+    template = get_template(template_path)
+    html = template.render(content)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+    html, dest=response)
+
+    # if error then show some funy view
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+
+
+# ------athulmon  gp----
+
+def accountant_dashboard(request):
+    if 'acc_id' in request.session:
+        if request.session.has_key('acc_id'):
+            acc_id = request.session['acc_id']
+            acc = user_registration.objects.filter(id=acc_id)
+            return render(request,'Accountant/accountant_dashboard.html',{'acc':acc})
+        else:
+            return redirect('/')
+        
+def account_department_leave(request):
+    if 'usernameacnt2' in request.session:
+        if request.session.has_key('usernameacnt2'):
+            usernameacnt2 = request.session['usernameacnt2']
+        z = user_registration.objects.filter(id=usernameacnt2)
+        dep=department.objects.all()
+        for d in dep:
+
+          d.count = leave.objects.filter(user__department__id=d.id,accounts_action=0).count()
+          print(d.count)   
+
+        return render(request,'account_department_leave.html',{'z':z,'dep':dep})
+    else:
+        return redirect('/')
+
+
+def account_leave_list(request,id):
+    if 'usernameacnt2' in request.session:
+        if request.session.has_key('usernameacnt2'):
+            usernameacnt2 = request.session['usernameacnt2']
+        z = user_registration.objects.filter(id=usernameacnt2)
+        z1 = leave.objects.filter(user__department__id=id).order_by('-from_date')
+        
+        dep=department.objects.all()
+        return render(request,'account_leave_list.html',{'z':z,'dep':dep,'z1':z1})
+    else:
+        return redirect('/')     
+
+def accounts_seen_leave(request,id):
+    data=z1 = leave.objects.get(id=id)
+    z1 = leave.objects.filter(id=id).update(accounts_action=1)
+    
+    return redirect('account_leave_list',data.user.department.id)
     
 
-def OFadmin_leave_form(request):
-    des1 = designation.objects.get(designation='Office admin')
-    if request.method == "POST":
-        leaves = leave()
-        leaves.from_date = request.POST['from']
-        leaves.to_date = request.POST['to']
-        leaves.leave_status = request.POST['haful']
-        leaves.reason = request.POST['reason']
-        leaves.leaveapprovedstatus=0
-        leaves.user_id = request.POST['dev_id']
-        leaves.designation_id = des1.id
+      
         
-        start = datetime.strptime(leaves.from_date, '%Y-%m-%d').date() 
-        end = datetime.strptime(leaves.to_date, '%Y-%m-%d').date()
-
-        diff = (end  - start).days
-        
-        cnt =  Event.objects.filter(start_time__range=(start,end)).count()
-        
-        if diff == 0:
-            leaves.days = 1
-        else:
-            leaves.days = diff - cnt
-            
-        leaves.save()
-        return redirect('OFadmin_applyleav')
-    else:
-        return redirect('OFadmin_applyleav')
-
-
-def OFadmin_applyleav(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')    
-        of_Adm = user_registration.objects.filter(id=ofadmin_id) 
-        return render(request, 'office_admin/OFadmin_applyleav.html', {'of_Adm': of_Adm})
-
-
-
-def OFadmin_leaverequiest(request):
-    if 'ofadmin_id' in request.session:
-        if request.session.has_key('ofadmin_id'):
-            ofadmin_id = request.session['ofadmin_id']
-        else:
-            return redirect('/')  
-        devl = leave.objects.filter(user_id=ofadmin_id)
-        of_Adm = user_registration.objects.filter(id=ofadmin_id)
-        return render(request, 'office_admin/OFadmin_leaverequiest.html', {'of_Adm': of_Adm, 'devl': devl})
-
-
-def OFadminlogout(request):
-    if 'ofadmin_id' in request.session:  
-        request.session.flush()
-        return redirect('/')
-    else:
-        return redirect('/') 
