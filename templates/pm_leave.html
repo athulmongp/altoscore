@@ -34,14 +34,16 @@
                   <td>{{i.to_date|date:'d-m-Y'}}</td>
                   <td>{{i.reason}}</td>
                   <td>
-                      {% if i.leaveapprovedstatus == '1' %}
+                      <!-- {% if i.leaveapprovedstatus == '1' %}
                     <div class="badge badge-outline-success">Approved</div>
                     {%else%}
                     <div class="badge badge-outline-warning">Pending</div>
 
 
 
-                  {% endif %}</td>
+                  {% endif %} -->
+                  {{i.leave_status}}
+                </td>
                   
                   
                 </tr>
