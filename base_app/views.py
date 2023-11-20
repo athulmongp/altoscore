@@ -10797,7 +10797,7 @@ def accounts_leave(request):
     emp = request.GET.get('emp')
     fdate = request.GET.get('fdate')
     tdate = request.GET.get('tdate')
-    leaves = leave.objects.filter(user_id=emp,from_date__gte=fdate,to_date__lte=tdate)
+    leaves = leave.objects.filter(user_id=emp,from_date__gte=fdate,to_date__lte=tdate).order_by('-from_date')
     return render(request,'accounts_leave.html', {'names':leaves})
     
 def accounts_leavehistory(request):

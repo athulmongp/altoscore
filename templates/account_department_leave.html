@@ -16,7 +16,9 @@
                   </div>
                 </div>
                 <div class="col-4 col-sm-4 col-md-2 col-lg-2 text-center text-xl-right">
-                  <h4 class="text-light" style="background-color: rgb(255, 0, 0,0.5); border-radius: 20px;padding: 8px;"> {{d.count}}</h4>
+                  {% if d.count != 0 %}
+                  <h4 class="text-light"> {{d.count}}</h4>
+                  {% endif %}
                 </div>
               </div>
             </div>
